@@ -1,0 +1,108 @@
+#lang racket/base
+
+(require net/url
+         racket/format
+         racket/match
+         racket/string
+         "error.rkt")
+
+(module+ test
+  (require rackunit
+           keyring/interface))
+
+(define (url-path-as-pathstring a-url)
+  (define paths
+    (for/list ([pp (in-list (url-path a-url))]) (path/param-path pp)))
+  (if (null? paths) #f (string-join #:before-first "/" paths "/")))
+
+(define (url-host-not-empty u)
+  (match (url-host u)
+    [(or #f "") #f]
+    [h h]))
+
+(define url-keyword-mappers
+  (list (cons url-user '#:user)
+        (cons url-host-not-empty '#:host)
+        (cons url-port '#:port)
+        (cons url-path-as-pathstring '#:path)))
+
+(define (parse-backend-connect-string conn-string)
+  (define u (string->url conn-string))
+  (define base-kwargs
+    (for*/list ([acc+kw (in-list url-keyword-mappers)]
+                [acc    (in-value (car acc+kw))]
+                [kw     (in-value (cdr acc+kw))]
+                [v      (in-value (acc u))]
+                #:when v)
+      (cons kw v)))
+  (define query-kwargs
+    (for*/list ([kv (in-list (url-query u))]
+                [k  (in-value (car kv))]
+                [v  (in-value (cdr kv))])
+      (cons (string->keyword (symbol->string k)) v)))
+  (define kwargs
+    (sort (append base-kwargs query-kwargs)
+          keyword<?
+          #:key car))
+  (values (url-scheme u) (map car kwargs) (map cdr kwargs)))
+
+(module+ test
+  (test-case "parse-backend-connect-string"
+    (define s "fake-backend:///all/passwords?token=cafebabe")
+    (define-values (backend kws args) (parse-backend-connect-string s))
+    (check-equal? backend "fake-backend")
+    (check-equal? kws (list '#:path '#:token))
+    (check-equal? args (list "/all/passwords" "cafebabe"))))
+
+(define (make-backend-module-path backend-name)
+  (string->symbol
+    (string-append "keyring/backend/" backend-name)))
+
+(define (missing-backend-module-error backend-name e)
+  (raise
+    (exn:fail:keyring:backend:load
+      (~a "Failed loading backend " backend-name "\n"
+          (exn-message e))
+      (exn-continuation-marks e))))
+
+(define (missing-backend-constructor-error backend-name)
+  (raise
+    (exn:fail:keyring:backend:load
+      (~a "Backend " (~s backend-name)
+          " does not provide a procedure make-keyring")
+      (current-continuation-marks))))
+
+(define (make-keyring-from-string url-string)
+  (define-values (backend-name kws args)
+    (parse-backend-connect-string url-string))
+  (define mod (make-backend-module-path backend-name))
+  (define make-keyring
+    (with-handlers ([exn:fail:filesystem:missing-module?
+                      (lambda (e) (missing-backend-module-error backend-name e))])
+      (dynamic-require mod
+                       'make-keyring
+                       (lambda () (missing-backend-constructor-error backend-name)))))
+  (keyword-apply make-keyring kws args null))
+
+(module+ test
+  (test-case "make-keyring-from-string missing backend"
+    (check-exn
+      exn:fail:keyring:backend:load?
+      (lambda ()
+        (make-keyring-from-string "nosuch:"))))
+
+  (test-case "make-keyring-from-string backend w/o constructor"
+    (check-exn
+      (lambda (e)
+        (and (exn:fail:keyring:backend:load? e)
+             (regexp-match? #px"provide a procedure make-keyring" (exn-message e))))
+      (lambda ()
+        (make-keyring-from-string "test-no-constr:"))))
+
+  ;; TODO: mismatched arguments
+
+  (test-case "make-keyring-from-string test backend"
+    (define keyring
+      (make-keyring-from-string "test://?service=test-service&username=userA&password=abc123"))
+    (check-equal? (get-password keyring "test-service" "userA") #"abc123")))
+
