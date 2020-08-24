@@ -248,6 +248,7 @@
                "failed to set password for service: ~a, username: ~a"
                service username)))
 
+    ;; TODO: implement this
     (define/public (delete-password service username)
       (error 'delete-password "unimplemented"))
 
