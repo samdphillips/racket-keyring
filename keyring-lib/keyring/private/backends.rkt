@@ -54,6 +54,58 @@
     (check-equal? kws (list '#:path '#:token))
     (check-equal? args (list "/all/passwords" "cafebabe"))))
 
+(define (remove-extra-kwargs accepted-kws kws args)
+  (cond
+    [(or (null? accepted-kws) (null? kws)) (values null null)]
+    [else
+      (define akw (car accepted-kws))
+      (define kw (car kws))
+      (cond
+        [(equal? akw kw)
+         (define-values (rkws rargs)
+           (remove-extra-kwargs (cdr accepted-kws) (cdr kws) (cdr args)))
+         (values (cons kw rkws) (cons (car args) rargs))]
+        [(keyword<? akw kw)
+         (remove-extra-kwargs (cdr accepted-kws) kws args)]
+        [else
+          (remove-extra-kwargs accepted-kws (cdr kws) (cdr args))])]))
+
+(define (conform-kwargs proc kws args)
+  (define-values (_reqd-kws accepted-kws) (procedure-keywords proc))
+  (cond
+    [(not accepted-kws) (values kws args)]
+    [else (remove-extra-kwargs accepted-kws kws args)]))
+
+(module+ test
+  (define (test-kw-proc #:host h #:path p #:token t) #f)
+
+  (test-case "conform-kwargs all present"
+    (define-values (kws args)
+      (conform-kwargs test-kw-proc
+                      (list '#:host '#:path '#:token)
+                      (list 1 2 3)))
+      (check-equal? kws '(#:host #:path #:token))
+      (check-equal? args '(1 2 3)))
+
+  (test-case "conform-kwargs extras a removed" #f)
+
+  (test-case "conform-kwargs any args"
+    (define-values (kws args)
+      (conform-kwargs (make-keyword-procedure
+                        (lambda (kws args) #f))
+                      (list '#:host '#:path '#:token)
+                      (list 1 2 3)))
+      (check-equal? kws '(#:host #:path #:token))
+      (check-equal? args '(1 2 3)))
+
+  (test-case "conform-kwargs procedure with no args"
+    (define-values (kws args)
+      (conform-kwargs (lambda () #f)
+                      (list '#:host '#:path '#:token)
+                      (list 1 2 3)))
+    (check-equal? kws null)
+    (check-equal? args null)))
+
 (define (make-backend-module-path backend-name)
   (string->symbol
     (string-append "keyring/backend/" backend-name)))
@@ -73,7 +125,7 @@
       (current-continuation-marks))))
 
 (define (make-keyring-from-string url-string)
-  (define-values (backend-name kws args)
+  (define-values (backend-name cfg-kws cfg-args)
     (parse-backend-connect-string url-string))
   (define mod (make-backend-module-path backend-name))
   (define make-keyring
@@ -82,6 +134,7 @@
       (dynamic-require mod
                        'make-keyring
                        (lambda () (missing-backend-constructor-error backend-name)))))
+  (define-values (kws args) (conform-kwargs make-keyring cfg-kws cfg-args))
   (keyword-apply make-keyring kws args null))
 
 (module+ test
@@ -98,8 +151,6 @@
              (regexp-match? #px"provide a procedure make-keyring" (exn-message e))))
       (lambda ()
         (make-keyring-from-string "test-no-constr:"))))
-
-  ;; TODO: mismatched arguments
 
   (test-case "make-keyring-from-string test backend"
     (define keyring
