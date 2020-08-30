@@ -6,6 +6,8 @@
          racket/string
          "error.rkt")
 
+(provide make-keyring-from-string)
+
 (module+ test
   (require rackunit
            keyring/interface))
