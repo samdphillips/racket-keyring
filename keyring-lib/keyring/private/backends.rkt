@@ -1,12 +1,17 @@
 #lang racket/base
 
+(require racket/contract)
+
+(provide
+  (contract-out
+    [make-keyring-from-string (-> string? (or/c #f keyring?))]))
+
 (require net/url
          racket/format
          racket/match
          racket/string
-         "error.rkt")
-
-(provide make-keyring-from-string)
+         "error.rkt"
+         "interface.rkt")
 
 (module+ test
   (require rackunit
@@ -130,7 +135,12 @@
   (define-values (backend-name cfg-kws cfg-args)
     (parse-backend-connect-string url-string))
   (define mod (make-backend-module-path backend-name))
-  (define make-keyring
+  (define/contract make-keyring
+    (suggest/c (unconstrained-domain-> (or/c #f keyring?))
+               "suggestion"
+               (~a backend-name
+                   " backend make-keyring"
+                   " function failed to produce a keyring?"))
     (with-handlers ([exn:fail:filesystem:missing-module?
                       (lambda (e) (missing-backend-module-error backend-name e))])
       (dynamic-require mod
