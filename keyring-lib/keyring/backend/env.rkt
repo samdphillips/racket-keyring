@@ -21,13 +21,13 @@
     (current-environment-variables)
     (build-env-key keyring service-name username)))
 
-(define (env-set-password keyring service-name username password)
+(define (env-set-password! keyring service-name username password)
   (environment-variables-set!
     (current-environment-variables)
     (build-env-key keyring service-name username)
     password))
 
-(define (env-delete-password keyring service-name username)
+(define (env-delete-password! keyring service-name username)
   (environment-variables-set!
     (current-environment-variables)
     (build-env-key keyring service-name username)
@@ -37,8 +37,8 @@
   #:methods
   gen:keyring
   [(define get-password env-get-password)
-   (define set-password env-set-password)
-   (define delete-password env-delete-password)])
+   (define set-password! env-set-password!)
+   (define delete-password! env-delete-password!)])
 
 (define (make-keyring #:prefix base-env-key)
   (env-keyring base-env-key))
@@ -62,8 +62,8 @@
 
       (check-equal? (get-password "" "bar") #"baz")
 
-      (set-password "foo" "bar3" #"baz3")
+      (set-password! "foo" "bar3" #"baz3")
       (check-equal? (get-password "foo" "bar3") #"baz3")
 
-      (delete-password "foo" "bar3")
+      (delete-password! "foo" "bar3")
       (check-false  (get-password "foo" "bar3")))))

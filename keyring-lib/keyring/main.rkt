@@ -2,8 +2,8 @@
 
 (provide keyring?
          get-password
-         set-password
-         delete-password
+         set-password!
+         delete-password!
          make-keyring-from-string
          default-keyring
 
@@ -15,9 +15,9 @@
 
          keyring/interface
          (rename-in keyring/interface
-                    [get-password $get-password]
-                    [set-password $set-password]
-                    [delete-password $delete-password])
+                    [get-password     $get-password]
+                    [set-password!    $set-password!]
+                    [delete-password! $delete-password!])
          keyring/private/error
          keyring/private/backends)
 
@@ -49,16 +49,16 @@
   (check-keyring 'get-password keyring)
   ($get-password keyring service-name username))
 
-(define (set-password service-name
-                      username
-                      password
-                      #:keyring [keyring (default-keyring)])
-  (check-keyring 'set-password keyring)
-  ($set-password keyring service-name username password))
+(define (set-password! service-name
+                       username
+                       password
+                       #:keyring [keyring (default-keyring)])
+  (check-keyring 'set-password! keyring)
+  ($set-password! keyring service-name username password))
 
-(define (delete-password service-name
-                         username
-                         #:keyring [keyring (default-keyring)])
-  (check-keyring 'delete-password keyring)
-  ($delete-password keyring service-name username))
+(define (delete-password! service-name
+                          username
+                          #:keyring [keyring (default-keyring)])
+  (check-keyring 'delete-password! keyring)
+  ($delete-password! keyring service-name username))
 

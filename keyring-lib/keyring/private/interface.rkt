@@ -6,8 +6,8 @@
 
          keyring?
          get-password
-         set-password
-         delete-password)
+         set-password!
+         delete-password!)
 
 (require racket/class
          racket/function
@@ -21,8 +21,8 @@
 (define keyring<%>
   (interface ()
     get-password
-    set-password
-    delete-password))
+    set-password!
+    delete-password!))
 
 (define (object-keyring? v)
   (is-a? v keyring<%>))
@@ -32,9 +32,9 @@
   (lambda (keyring . args)
     (send-generic keyring method-generic . args)))
 
-(define get-password/obj    (make-object-keyring-shim 'get-password))
-(define set-password/obj    (make-object-keyring-shim 'set-password))
-(define delete-password/obj (make-object-keyring-shim 'delete-password))
+(define get-password/obj     (make-object-keyring-shim 'get-password))
+(define set-password!/obj    (make-object-keyring-shim 'set-password!))
+(define delete-password!/obj (make-object-keyring-shim 'delete-password!))
 
 
 ;;
@@ -57,25 +57,25 @@
     (define method ((vector-ref desc slot) obj))
     (apply method obj args)))
 
-(define get-password/prop    (make-struct-property-shim 0))
-(define set-password/prop    (make-struct-property-shim 1))
-(define delete-password/prop (make-struct-property-shim 2))
+(define get-password/prop     (make-struct-property-shim 0))
+(define set-password!/prop    (make-struct-property-shim 1))
+(define delete-password!/prop (make-struct-property-shim 2))
 
 
 ;;
 ;; struct generics to tie the room together
 
 (define-generics keyring
-  [get-password    keyring service username]
-  [set-password    keyring service username password]
-  [delete-password keyring service username]
+  [get-password     keyring service username]
+  [set-password!    keyring service username password]
+  [delete-password! keyring service username]
   #:defaults
   ([object-keyring?
-    (define get-password    get-password/obj)
-    (define set-password    set-password/obj)
-    (define delete-password delete-password/obj)]
+    (define get-password     get-password/obj)
+    (define set-password!    set-password!/obj)
+    (define delete-password! delete-password!/obj)]
    [prop:keyring?
-    (define get-password    get-password/prop)
-    (define set-password    set-password/prop)
-    (define delete-password delete-password/prop)]))
+    (define get-password     get-password/prop)
+    (define set-password!    set-password!/prop)
+    (define delete-password! delete-password!/prop)]))
 

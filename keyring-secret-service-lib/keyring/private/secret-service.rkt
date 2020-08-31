@@ -231,7 +231,7 @@
       (define item (find-item service username))
       (and item (send item GetSecret)))
 
-    (define/public (set-password service username password)
+    (define/public (set-password! service username password)
       (define attrs
         `(["username" . ,username]
           ["service"  . ,service]))
@@ -249,8 +249,8 @@
                service username)))
 
     ;; TODO: implement this
-    (define/public (delete-password service username)
-      (error 'delete-password "unimplemented"))
+    (define/public (delete-password! service username)
+      (error 'delete-password! "unimplemented"))
 
     (super-new)))
 
@@ -277,7 +277,7 @@
     (test-case "simple set and get password"
       (define kr (new secret-service-keyring% [secret-collection-path test-collection-path]))
       (with-service kr
-        (set-password kr "test1" "test1-user" #"test1-secret")
+        (set-password! kr "test1" "test1-user" #"test1-secret")
         (check-equal? (get-password kr "test1" "test1-user") #"test1-secret")))
 
     ;; remove testing collection

@@ -13,8 +13,8 @@
        [(test-keyring (== service-name) (== username) secret) secret]
        [_ #f]))
 
-   (define set-password void)
-   (define delete-password void)]
+   (define set-password! void)
+   (define delete-password! void)]
   #:transparent)
 
 (define (make-keyring #:service  service-name

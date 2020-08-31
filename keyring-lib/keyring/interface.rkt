@@ -10,9 +10,9 @@
 
   keyring?
   (contract-out
-    [get-password    (-> keyring? string? string? (or/c #f bytes?))]
-    [set-password    (-> keyring? string? string? bytes? any)]
-    [delete-password (-> keyring? string? string? any)])
+    [get-password     (-> keyring? string? string? (or/c #f bytes?))]
+    [set-password!    (-> keyring? string? string? bytes? any)]
+    [delete-password! (-> keyring? string? string? any)])
 
   keyring-logger
   log-keyring-fatal
