@@ -3,7 +3,7 @@
 (provide make-keyring)
 
 (require racket/class
-         keyring/private/secret-service)
+         keyring/backend/private/secret-service)
 
 (define (make-keyring
           #:path [path "/org/freedesktop/secrets/collection/login"])
