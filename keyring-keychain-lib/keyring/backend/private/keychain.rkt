@@ -2,6 +2,9 @@
 
 ;; cribbed from https://github.com/jaraco/keyring/blob/master/keyring/backends/_OS_X_API.py
 
+(provide sec-keychain-copy-default
+         sec-keychain-open)
+
 (require racket/dict
          ffi/unsafe
          ffi/unsafe/alloc
