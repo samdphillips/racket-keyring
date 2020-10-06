@@ -30,7 +30,12 @@
                            [#:keyring keyring keyring? (default-keyring)])
          void?]
 
-@defproc[(make-keyring-from-string [keyring-spec string?]) keyring?]
+@defproc[(make-keyring-from-string [keyring-spec string?]) keyring?]{
+  Constructs a keyring using the backend specified by the url string
+  @racket[keyring-spec].  Will raise @racket[exn:fail:keyring:backend:load]
+  if @racket[keyring-spec] is not a valid url or if the backend cannot be
+  loaded.
+}
 
 @defparam[default-keyring keyring (or/c #f keyring?)]
 
