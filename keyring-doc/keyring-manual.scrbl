@@ -1,6 +1,10 @@
 #lang scribble/manual
 
-@(require (for-label racket))
+@(require (for-label
+            racket
+            (only-in keyring
+                     keyring?
+                     default-keyring)))
 
 @title{keyring - a library for uniformly accessing secrets}
 
