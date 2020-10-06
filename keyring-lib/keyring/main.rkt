@@ -26,8 +26,10 @@
   (and keyring-spec
        (with-handlers ([exn:fail?
                          (lambda (e)
-                           (log-keyring-error "error initializing keyring from environment")
-                           (log-keyring-error "keyring spec: ~s" keyring-spec)
+                           (log-keyring-error
+                             "error initializing keyring from environment")
+                           (log-keyring-error
+                             "keyring spec: ~s" keyring-spec)
                            (log-keyring-error (exn->string e))
                            #f)])
          (make-keyring-from-string keyring-spec))))

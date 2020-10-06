@@ -124,6 +124,13 @@
           (exn-message e))
       (exn-continuation-marks e))))
 
+(define (invalid-backend-url url-string error-description)
+  (raise
+    (exn:fail:keyring:backend:load
+      (~a "Invalid backend url (" (~s url-string) "): "
+          error-description)
+      (current-continuation-marks))))
+
 (define (missing-backend-constructor-error backend-name)
   (raise
     (exn:fail:keyring:backend:load
@@ -133,7 +140,13 @@
 
 (define (make-keyring-from-string url-string)
   (define-values (backend-name cfg-kws cfg-args)
-    (parse-backend-connect-string url-string))
+    (with-handlers ([url-exception? (lambda (e)
+                                      (invalid-backend-url url-string
+                                                           (exn-message e)))])
+      (parse-backend-connect-string url-string)))
+  (unless backend-name
+    (invalid-backend-url url-string "no backend specified"))
+
   (define mod (make-backend-module-path backend-name))
   (define/contract make-keyring
     (suggest/c (unconstrained-domain-> (or/c #f keyring?))
@@ -164,8 +177,25 @@
       (lambda ()
         (make-keyring-from-string "test-no-constr:"))))
 
+  (test-case "make-keyring-from-string backend no backend specified"
+    (check-exn
+      (lambda (e)
+        (and (exn:fail:keyring:backend:load? e)
+             (regexp-match? #px"no backend specified" (exn-message e))))
+      (lambda ()
+        (make-keyring-from-string "test"))))
+
+  (test-case "make-keyring-from-string backend invalid scheme"
+    (check-exn
+      (lambda (e)
+        (and (exn:fail:keyring:backend:load? e)
+             (regexp-match? #px"invalid URL string" (exn-message e))))
+      (lambda ()
+        (make-keyring-from-string "xxx;yyy://test"))))
+
   (test-case "make-keyring-from-string test backend"
     (define keyring
-      (make-keyring-from-string "test://?service=test-service&username=userA&password=abc123"))
+      (make-keyring-from-string
+        "test://?service=test-service&username=userA&password=abc123"))
     (check-equal? (get-password keyring "test-service" "userA") #"abc123")))
 
