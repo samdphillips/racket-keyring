@@ -2,9 +2,10 @@
 
 @(require (for-label
             racket
-            (only-in keyring
-              keyring?
-              default-keyring)))
+            (except-in keyring
+              get-password
+              set-password!
+              delete-password!)))
 
 @title{keyring - a library for uniformly accessing secrets}
 
@@ -32,17 +33,26 @@
 
 @defproc[(make-keyring-from-string [keyring-spec string?]) keyring?]{
   Constructs a keyring using the backend specified by the url string
-  @racket[keyring-spec].  Will raise an exception that passes
-  @racket[exn:fail:keyring:backend:load?] if @racket[keyring-spec] is
-  not a valid url or if the backend cannot be loaded.
+  @racket[keyring-spec].  This procedure will raise an exception that
+  passes @racket[keyring-backend-load-error?] if @racket[keyring-spec]
+  is not a valid url or if the backend cannot be loaded.
 }
 
 @defparam[default-keyring keyring (or/c #f keyring?)]
 
-@; document predicates not structs
-@defstruct*[(exn:fail:keyring exn:fail) ()]
-@defstruct*[(exn:fail:keyring:backend exn:fail:keyring) ()]
-@defstruct*[(exn:fail:keyring:backend:load exn:fail:keyring:backend) ()]
+@subsection{Exceptions}
+
+@defproc[(keyring-error? [v any/c]) boolean?]
+
+@defproc[(keyring-backend-error? [v any/c]) boolean?]
+
+@defproc[(keyring-backend-error-name [e keyring-backend-error?])
+         (or/c #f string?)]
+
+@defproc[(keyring-backend-load-error? [v any/c]) boolean?]
+
+@defproc[(keyring-backend-load-error-name [e keyring-backend-load-error?])
+         (or/c #f string?)]
 
 @section{Back End Interface}
 

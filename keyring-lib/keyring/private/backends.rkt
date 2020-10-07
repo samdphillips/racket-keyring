@@ -117,35 +117,39 @@
   (string->symbol
     (string-append "keyring/backend/" backend-name)))
 
-(define (missing-backend-module-error backend-name e)
-  (raise
-    (exn:fail:keyring:backend:load
-      (~a "Failed loading backend " backend-name "\n"
-          (exn-message e))
-      (exn-continuation-marks e))))
+(define (missing-backend-module-error who backend-name e)
+  (raise-backend-load-error who
+                            "failed loading backend"
+                            backend-name
+                            (list
+                              (cons 'orig-exn (exn-message e)))))
 
-(define (invalid-backend-url url-string error-description)
-  (raise
-    (exn:fail:keyring:backend:load
-      (~a "Invalid backend url (" (~s url-string) "): "
-          error-description)
-      (current-continuation-marks))))
+(define (invalid-backend-url who url-string error-description e)
+  (define msg
+    (if error-description
+        (~a "invalid backend url, " error-description)
+        "invalid backend url"))
+  (define details
+    (list* (cons 'url url-string)
+           (if e
+               (list (cons 'orig-exn (exn-message e)))
+               null)))
+  (raise-backend-load-error who msg #f details))
 
-(define (missing-backend-constructor-error backend-name)
-  (raise
-    (exn:fail:keyring:backend:load
-      (~a "Backend " (~s backend-name)
-          " does not provide a procedure make-keyring")
-      (current-continuation-marks))))
+(define (missing-backend-constructor-error who backend-name)
+  (raise-backend-load-error who
+                            "backend does not provide a make-keyring procedure"
+                            backend-name))
 
 (define (make-keyring-from-string url-string)
   (define-values (backend-name cfg-kws cfg-args)
-    (with-handlers ([url-exception? (lambda (e)
-                                      (invalid-backend-url url-string
-                                                           (exn-message e)))])
+    (with-handlers ([url-exception?
+                      (lambda (e)
+                        (invalid-backend-url 'make-keyring-from-string url-string #f e))])
       (parse-backend-connect-string url-string)))
   (unless backend-name
-    (invalid-backend-url url-string "no backend specified"))
+    (invalid-backend-url
+      'make-keyring-from-string url-string "no backend specified" #f))
 
   (define mod (make-backend-module-path backend-name))
   (define/contract make-keyring
@@ -155,41 +159,52 @@
                    " backend make-keyring"
                    " function failed to produce a keyring?"))
     (with-handlers ([exn:fail:filesystem:missing-module?
-                      (lambda (e) (missing-backend-module-error backend-name e))])
+                      (lambda (e)
+                        (missing-backend-module-error
+                          'make-keyring-from-string backend-name e))])
       (dynamic-require mod
                        'make-keyring
-                       (lambda () (missing-backend-constructor-error backend-name)))))
+                       (lambda ()
+                         (missing-backend-constructor-error
+                           'make-keyring-from-string backend-name)))))
   (define-values (kws args) (conform-kwargs make-keyring cfg-kws cfg-args))
   (keyword-apply make-keyring kws args null))
 
 (module+ test
   (test-case "make-keyring-from-string missing backend"
     (check-exn
-      exn:fail:keyring:backend:load?
+      (lambda (e)
+        (and (keyring-backend-load-error? e)
+             (equal? (keyring-backend-load-error-name e) "nosuch")))
       (lambda ()
         (make-keyring-from-string "nosuch:"))))
 
   (test-case "make-keyring-from-string backend w/o constructor"
     (check-exn
       (lambda (e)
-        (and (exn:fail:keyring:backend:load? e)
-             (regexp-match? #px"provide a procedure make-keyring" (exn-message e))))
+        (and (keyring-backend-load-error? e)
+             (regexp-match?
+               #px"backend does not provide a make-keyring procedure"
+               (exn-message e))
+             (equal? (keyring-backend-load-error-name e) "test-no-constr")))
       (lambda ()
         (make-keyring-from-string "test-no-constr:"))))
 
   (test-case "make-keyring-from-string backend no backend specified"
     (check-exn
       (lambda (e)
-        (and (exn:fail:keyring:backend:load? e)
-             (regexp-match? #px"no backend specified" (exn-message e))))
+        (and (keyring-backend-load-error? e)
+             (regexp-match? #px"no backend specified" (exn-message e))
+             (equal? (keyring-backend-load-error-name e) #f)))
       (lambda ()
         (make-keyring-from-string "test"))))
 
   (test-case "make-keyring-from-string backend invalid scheme"
     (check-exn
       (lambda (e)
-        (and (exn:fail:keyring:backend:load? e)
-             (regexp-match? #px"invalid URL string" (exn-message e))))
+        (and (keyring-backend-load-error? e)
+             (regexp-match? #px"invalid URL string" (exn-message e))
+             (equal? (keyring-backend-load-error-name e) #f)))
       (lambda ()
         (make-keyring-from-string "xxx;yyy://test"))))
 

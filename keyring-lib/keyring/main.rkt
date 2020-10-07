@@ -7,9 +7,11 @@
          make-keyring-from-string
          default-keyring
 
-         exn:fail:keyring?
-         exn:fail:keyring:backend?
-         exn:fail:keyring:backend:load?)
+         keyring-error?
+         keyring-backend-error?
+         keyring-backend-error-name
+         keyring-backend-load-error?
+         keyring-backend-load-error-name)
 
 (require racket/exn
 
@@ -40,7 +42,7 @@
 (define (check-keyring who keyring)
   (unless (keyring? keyring)
     (raise
-      (exn:fail:keyring
+      (keyring-error
         (format "~a: not a keyring: ~a"
                 who keyring)
         (current-continuation-marks)))))

@@ -1,11 +1,27 @@
 #lang racket/base
 
 (provide
-  (struct-out exn:fail:keyring)
-  (struct-out exn:fail:keyring:backend)
-  (struct-out exn:fail:keyring:backend:load))
+  raise-backend-load-error
 
-(struct exn:fail:keyring              exn:fail         [])
-(struct exn:fail:keyring:backend      exn:fail:keyring [])
-(struct exn:fail:keyring:backend:load exn:fail:keyring [])
+  (struct-out keyring-error)
+  (struct-out keyring-backend-error)
+  (struct-out keyring-backend-load-error))
+
+(require racket/format)
+
+(struct keyring-error              exn:fail      [])
+(struct keyring-backend-error      keyring-error [name])
+(struct keyring-backend-load-error keyring-error [name])
+
+(define (raise-backend-load-error who msg [backend #f] [details null])
+  (define full-message
+    (~a (~.a who ": " msg ";") "\n"
+         (apply ~a #:separator "\n"
+                (~.a "  backend: " backend)
+                (for/list ([kv (in-list details)])
+                  (~.a "  " (car kv) ": " (cdr kv))))))
+  (raise
+    (keyring-backend-load-error full-message
+                                (current-continuation-marks)
+                                backend)))
 
