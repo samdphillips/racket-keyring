@@ -1,13 +1,48 @@
 #lang scribble/manual
 
-@(require (for-label
+@(require racket/format
+          (for-label
             racket
             (except-in keyring
               get-password
               set-password!
               delete-password!)))
 
+@(define (pkglink pkg-name)
+   (link #:style "RktSym"
+         (~a "https://pkgd.racket-lang.org/pkgn/package/" pkg-name)
+         pkg-name))
+
 @title{keyring - a library for uniformly accessing secrets}
+
+The @racket[keyring] library is a library to access various password
+stores in a uniform way.  It is based loosely on the
+@link["https://github.com/jaraco/keyring"]{Python keyring library}.
+
+The base library contains a basic environment variable based backend.
+Additionally there are other backends that interface with other secret
+stores which can be installed.
+@itemlist[
+  @item{@pkglink{keyring-secret-service-lib} -
+    @link["https://specifications.freedesktop.org/secret-service/latest/"]{
+      Freedesktop Secret Service
+    }, used on Linux desktop}
+
+  @item{@pkglink{keyring-keychain-lib} -
+    @link["https://en.wikipedia.org/wiki/Keychain_%28software%29"]{Mac OSX Keychain}
+  }
+
+  @item{
+    @elem[#:style "RktSym"]{keyring-credential-locker-lib} -
+    @link["https://docs.microsoft.com/en-us/windows/uwp/security/credential-locker"]{
+      Windows Credential Locker} backend (TBD)}
+
+  @item{@pkglink{keyring-get-pass-lib} -
+    backend that prompts the user on the console for a password using
+    @other-doc['(lib "get-pass/scribblings/get-pass.scrbl")].
+  }
+]
+
 
 @section{Front End Interface}
 
