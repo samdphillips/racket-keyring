@@ -50,7 +50,7 @@
    (define (delete-password! kr service username)
      (when (get-pass-keyring-cache kr)
        (hash-remove! (get-pass-keyring-cache kr)
-                     (make-key service username)))])
+                     (make-key service username))))])
 
 (define (make-keyring #:cache [cache? #t])
   (let* ([cache? (coerce-boolean cache?)]
