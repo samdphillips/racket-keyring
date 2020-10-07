@@ -3,8 +3,8 @@
 @(require (for-label
             racket
             (only-in keyring
-                     keyring?
-                     default-keyring)))
+              keyring?
+              default-keyring)))
 
 @title{keyring - a library for uniformly accessing secrets}
 
@@ -32,13 +32,14 @@
 
 @defproc[(make-keyring-from-string [keyring-spec string?]) keyring?]{
   Constructs a keyring using the backend specified by the url string
-  @racket[keyring-spec].  Will raise @racket[exn:fail:keyring:backend:load]
-  if @racket[keyring-spec] is not a valid url or if the backend cannot be
-  loaded.
+  @racket[keyring-spec].  Will raise an exception that passes
+  @racket[exn:fail:keyring:backend:load?] if @racket[keyring-spec] is
+  not a valid url or if the backend cannot be loaded.
 }
 
 @defparam[default-keyring keyring (or/c #f keyring?)]
 
+@; document predicates not structs
 @defstruct*[(exn:fail:keyring exn:fail) ()]
 @defstruct*[(exn:fail:keyring:backend exn:fail:keyring) ()]
 @defstruct*[(exn:fail:keyring:backend:load exn:fail:keyring:backend) ()]
@@ -72,7 +73,17 @@
 @defthing[prop:keyring struct-type-property?]
 
 @definterface[keyring<%> ()]{
-  @defmethod[(get-password     [service-name string?] [username string?]) (or/c #f bytes?)]
-  @defmethod[(set-password!    [service-name string?] [username string?] [password bytes?]) void?]
-  @defmethod[(remove-password! [service-name string?] [username string?]) void?]
+  @defmethod[(get-password
+               [service-name string?]
+               [username string?])
+             (or/c #f bytes?)]
+  @defmethod[(set-password!
+               [service-name string?]
+               [username string?]
+               [password bytes?])
+             void?]
+  @defmethod[(remove-password!
+               [service-name string?]
+               [username string?])
+             void?]
 }
