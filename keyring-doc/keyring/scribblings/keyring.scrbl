@@ -14,6 +14,7 @@
          pkg-name))
 
 @title{keyring - a library for uniformly accessing secrets}
+@author[(author+email "Sam Phillips" "samdphillips@gmail.com")]
 
 The @racket[keyring] library is a library to access various password
 stores in a uniform way.  It is based loosely on the
@@ -39,7 +40,8 @@ stores which can be installed.
 
   @item{@pkglink{keyring-get-pass-lib} -
     backend that prompts the user on the console for a password using
-    @other-doc['(lib "get-pass/scribblings/get-pass.scrbl")].
+    @other-doc['(lib "get-pass/scribblings/get-pass.scrbl")
+               #:indirect "get-pass library"].
   }
 ]
 
