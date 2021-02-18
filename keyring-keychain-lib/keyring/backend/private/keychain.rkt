@@ -5,7 +5,11 @@
 (provide sec-keychain-copy-default
          sec-keychain-open
          sec-keychain-find-generic-password
-         sec-keychain-add-generic-password)
+         sec-keychain-add-generic-password
+         sec-keychain-find-generic-item
+         sec-keychain-item-modify-attributes-and-data
+         sec-keychain-item-delete
+         sec-keychain-item?)
 
 (require racket/dict
          ffi/unsafe
@@ -112,6 +116,15 @@
       (inner kc service-name-bytes username-bytes))
     (allocate-wrapper wrap)))
 
+(define-security-ffi sec-keychain-item-modify-attributes-and-data
+  (_fun _sec-keychain-item
+        [_pointer = #f]
+        [_uint32 = (bytes-length password)]
+        [password : _bytes]
+        -> [status : _int32]
+        -> (status-or-value status 'ok))
+  #:c-id SecKeychainItemModifyAttributesAndData)
+
 (define-security-ffi sec-keychain-add-generic-password
   (_fun _sec-keychain
         [_uint32 = (bytes-length service-name)]
@@ -122,7 +135,7 @@
         [password : _bytes]
         [_pointer = #f]
         -> [status : _int32]
-        -> (dict-ref sec-keychain-status-codes status status))
+        -> (status-or-value status 'ok))
   #:wrap
   (lambda (inner)
     (lambda (kc service-name username password)
@@ -146,6 +159,13 @@
       (sec-keychain-add-generic-password kc "test1" "test" #"abc123")
       (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
                     #"abc123"))
+
+    (test-case "sec-keychain-item-modify-attributes-and-data"
+      (define kc (sec-keychain-open test-keychain-path))
+      (define item (sec-keychain-find-generic-item kc "test1" "test"))
+      (check-equal? (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
+      (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
+                    #"xyz123"))
 
     (let ()
       (define kc (sec-keychain-open test-keychain-path))

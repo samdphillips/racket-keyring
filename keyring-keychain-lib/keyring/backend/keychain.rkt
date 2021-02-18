@@ -2,7 +2,8 @@
 
 (provide make-keyring)
 
-(require keyring/interface
+(require racket/match
+         keyring/interface
          keyring/backend/private/keychain)
 
 (struct keychain-keyring [kc]
@@ -14,19 +15,30 @@
      (cond
        [(bytes? password) password]
        [else
-         (log-keyring-warning "backend=~a, action=~a, status=~a" 'keychain 'get-password password)
+         (log-keyring-warning "backend=~a, action=~a, status=~a"
+                              'keychain 'get-password password)
          #f]))
 
    (define (set-password! kr service-name username password)
      (define kc (keychain-keyring-kc kr))
-     (define status (sec-keychain-add-generic-password kc service-name username password))
+     (define-values (status method)
+       (match (sec-keychain-find-generic-item kc service-name username)
+         [(? sec-keychain-item? item)
+          (values (sec-keychain-item-modify-attributes-and-data item password)
+                  'modify)]
+         ['item-not-found
+          (values (sec-keychain-add-generic-password kc service-name
+                                                     username password)
+                  'add)]
+         [status (values status #f)]))
      (unless (eq? 'ok status)
        (raise-backend-error 'set-password!
                             "error setting password"
                             'keychain
-                            (list (cons 'error-code status)))))
-
-
+                            (append (list (cons 'error-code status))
+                                    (if method
+                                        (list (cons 'method method))
+                                        null)))))
      ])
 
 (define (make-keyring #:path [path #f])
