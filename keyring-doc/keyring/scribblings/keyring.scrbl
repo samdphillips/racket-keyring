@@ -75,7 +75,12 @@ stores which can be installed.
   is not a valid url or if the backend cannot be loaded.
 }
 
-@defparam[default-keyring keyring (or/c #f keyring?)]
+@defparam[default-keyring keyring (or/c #f keyring?)]{
+  The default keyring to use.  When the @racket[keyring] module is
+  loaded it reads the @envvar{KEYRING} environment variable and
+  applies @racket[make-keyring-from-string] to the value and sets
+  @racket[default-keyring] to the result.
+}
 
 @subsection{Exceptions}
 

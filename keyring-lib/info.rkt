@@ -2,7 +2,7 @@
 
 (define collection 'multi)
 (define name "keyring-lib")
-(define version 0.1)
+(define version 0.9)
 (define deps '("base"))
 (define build-deps '("base" "rackunit-lib"))
 (define pkg-authors '(samdphillips@gmail.com))
