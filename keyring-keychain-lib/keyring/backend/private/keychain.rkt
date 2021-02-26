@@ -163,7 +163,8 @@
     (test-case "sec-keychain-item-modify-attributes-and-data"
       (define kc (sec-keychain-open test-keychain-path))
       (define item (sec-keychain-find-generic-item kc "test1" "test"))
-      (check-equal? (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
+      (check-equal?
+        (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
       (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
                     #"xyz123"))
 
