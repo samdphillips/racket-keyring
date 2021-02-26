@@ -39,7 +39,18 @@
                                     (if method
                                         (list (cons 'method method))
                                         null)))))
-     ])
+
+   (define (remove-password! kr service-name username)
+     (define kc (keychain-keyring-kc kr))
+     (define status
+       (match (sec-keychain-find-generic-item kc service-name username)
+         [(? sec-keychain-item? item) (sec-keychain-item-delete item)]
+         [status status]))
+     (unless (or (eq? 'ok status) (eq? 'item-not-found status))
+       (raise-backend-error 'remove-password!
+                            "error removing password"
+                            'keychain
+                            (list (cons 'error-code status)))))])
 
 (define (make-keyring #:path [path #f])
   (define kc
