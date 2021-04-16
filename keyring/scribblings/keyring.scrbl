@@ -13,7 +13,7 @@
          (~a "https://pkgd.racket-lang.org/pkgn/package/" pkg-name)
          pkg-name))
 
-@title{keyring - a library for uniformly accessing secrets}
+@title{keyring: a library for uniformly accessing secrets}
 @author[(author+email "Sam Phillips" "samdphillips@gmail.com")]
 
 The @racket[keyring] library is a library to access various password
