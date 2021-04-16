@@ -6,6 +6,8 @@
          keyring/interface
          keyring/backend/private/keychain)
 
+(module test racket/base)
+
 (struct keychain-keyring [kc]
   #:methods gen:keyring
   [(define (get-password kr service-name username)

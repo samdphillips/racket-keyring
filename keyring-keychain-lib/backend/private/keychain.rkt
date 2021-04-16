@@ -17,7 +17,11 @@
          ffi/unsafe/define
          ffi/unsafe/define/conventions)
 
-(module+ test
+;; Use of the `keychain-test` submodule instead of the standard `test`
+;; submodule is to subvert the package server from running this module.  The
+;; package server runs Linux and this will always fail there.
+(module test racket/base)
+(module+ keychain-test
   (require rackunit))
 
 (define core-lib
@@ -148,7 +152,7 @@
         -> [status : _int32]
         -> (dict-ref sec-keychain-status-codes status status)))
 
-(module+ test
+(module+ keychain-test
   (define test-keychain-path
     (let ([path (getenv "MACOSX_TEST_KEYCHAIN")])
       (and path (path->complete-path path))))
