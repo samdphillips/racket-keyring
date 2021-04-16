@@ -22,7 +22,7 @@ stores in a uniform way.  It is based loosely on the
 
 The base library contains a basic environment variable based backend.
 Additionally there are other backends that interface with other secret
-stores which can be installed.
+stores which can be installed separately.
 @itemlist[
   @item{@pkglink{keyring-secret-service-lib} -
     @link["https://specifications.freedesktop.org/secret-service/latest/"]{
