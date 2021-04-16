@@ -6,3 +6,5 @@
 (define deps '("base"))
 (define build-deps '("base" "rackunit-lib"))
 (define pkg-authors '(samdphillips@gmail.com))
+(define raco-commands
+  '(["keyring" (submod keyring/cli main) "access keyring at the command line" 5]))
