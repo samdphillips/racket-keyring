@@ -57,7 +57,5 @@
     (if path
         (sec-keychain-open path)
         (sec-keychain-copy-default)))
-  (log-keyring-debug "making keyring backend=~a keyring-path=~a result=~a"
-                     'keyring path kc)
   (keychain-keyring kc))
 

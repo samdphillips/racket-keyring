@@ -10,8 +10,8 @@
          racket/format
          racket/match
          racket/string
-         "error.rkt"
-         "interface.rkt")
+         keyring/interface
+         keyring/private/error)
 
 (module+ test
   (require rackunit
@@ -168,6 +168,8 @@
                          (missing-backend-constructor-error
                            'make-keyring-from-string backend-name)))))
   (define-values (kws args) (conform-kwargs make-keyring cfg-kws cfg-args))
+  (log-keyring-debug "making keyring backend=~a args=~a"
+                     backend-name (map cons kws args))
   (keyword-apply make-keyring kws args null))
 
 (module+ test
