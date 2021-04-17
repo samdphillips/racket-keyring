@@ -45,12 +45,7 @@
 
 (module test racket/base
   (require keyring
-           rackunit
-           syntax/parse/define)
-  (define-simple-macro (with-keyring s:str body ...+)
-    (parameterize ([default-keyring (make-keyring-from-string s)])
-      body ...))
-
+           rackunit)
   (parameterize ([current-environment-variables
                    (make-environment-variables
                      #"SECRET_foo_bar1" #"baz1"

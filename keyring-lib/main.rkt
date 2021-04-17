@@ -6,6 +6,7 @@
          delete-password!
          make-keyring-from-string
          default-keyring
+         with-keyring
 
          keyring-error?
          keyring-backend-error?
@@ -14,6 +15,8 @@
          keyring-backend-load-error-name)
 
 (require racket/exn
+         (for-syntax racket/base)
+         syntax/parse/define
 
          keyring/interface
          (rename-in keyring/interface
@@ -44,6 +47,14 @@
 
 (define default-keyring
   (make-parameter (maybe-initialize-default-keyring)))
+
+(define-syntax-parser with-keyring
+  [(_ s:str body ...+)
+   #'(parameterize ([default-keyring (make-keyring-from-string s)])
+       body ...)]
+  [(_ e body ...+)
+   #:declare e (expr/c #'keyring?)
+   #'(parameterize ([default-keyring e.c]) body ...)])
 
 (define-syntax-rule (log-trace who service-name username)
   (log-keyring-debug "~a: service=~a user=~a" who service-name username))
