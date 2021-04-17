@@ -78,7 +78,10 @@
                       #:keyring [keyring (default-keyring)])
   (log-trace 'get-password service-name username)
   (check-keyring 'get-password keyring)
-  ($get-password keyring service-name username))
+  (define secret ($get-password keyring service-name username))
+  (unless secret
+    (log-keyring-debug "password not found"))
+  secret)
 
 (define (set-password! service-name
                        username
