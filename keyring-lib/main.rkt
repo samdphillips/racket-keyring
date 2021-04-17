@@ -25,31 +25,47 @@
 
 (define (maybe-initialize-default-keyring)
   (define keyring-spec (getenv "KEYRING"))
-  (and keyring-spec
-       (with-handlers ([exn:fail?
-                         (lambda (e)
-                           (log-keyring-error
-                             "error initializing keyring from environment")
-                           (log-keyring-error
-                             "keyring spec: ~s" keyring-spec)
-                           (log-keyring-error (exn->string e))
-                           #f)])
-         (make-keyring-from-string keyring-spec))))
+  (cond
+    [keyring-spec
+     (with-handlers ([exn:fail?
+                      (lambda (e)
+                        (log-keyring-error
+                         "error initializing keyring from environment")
+                        (log-keyring-error
+                         "keyring spec: ~s" keyring-spec)
+                        (log-keyring-error (exn->string e))
+                        #f)])
+       (make-keyring-from-string keyring-spec))]
+    [else
+     (log-keyring-warning
+      (string-append "KEYRING environment variable not set. "
+                     "No default-keyring will be set up."))
+     #f]))
 
 (define default-keyring
   (make-parameter (maybe-initialize-default-keyring)))
 
+(define-syntax-rule (log-trace who service-name username)
+  (log-keyring-debug "~a: service=~a user=~a" who service-name username))
+
 (define (check-keyring who keyring)
   (unless (keyring? keyring)
-    (raise
-      (keyring-error
-        (format "~a: not a keyring: ~a"
-                who keyring)
-        (current-continuation-marks)))))
+    (define msg
+      (format "~a: not a keyring: ~a" who keyring))
+    (log-keyring-error msg)
+    (unless keyring
+      (log-keyring-error
+       (string-append
+        "default-keyring may not have been initialized. "
+        "Set KEYRING environment variable before loading the "
+        "keyring library or initialize a keyring with "
+        "make-keyring-from-string")))
+    (raise (keyring-error msg (current-continuation-marks)))))
 
 (define (get-password service-name
                       username
                       #:keyring [keyring (default-keyring)])
+  (log-trace 'get-password service-name username)
   (check-keyring 'get-password keyring)
   ($get-password keyring service-name username))
 
@@ -57,12 +73,14 @@
                        username
                        password
                        #:keyring [keyring (default-keyring)])
+  (log-trace 'set-password! service-name username)
   (check-keyring 'set-password! keyring)
   ($set-password! keyring service-name username password))
 
 (define (delete-password! service-name
                           username
                           #:keyring [keyring (default-keyring)])
+  (log-trace 'delete-password! service-name username)
   (check-keyring 'delete-password! keyring)
   ($delete-password! keyring service-name username))
 
