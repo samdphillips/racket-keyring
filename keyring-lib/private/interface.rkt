@@ -46,16 +46,15 @@
     (cond
       [(procedure? v) (const v)]
       [else
-        (lambda (o) (ref o v))])))
+       (lambda (o) (ref o v))])))
 
 (define-values (prop:keyring prop:keyring? prop-keyring-funcs)
   (make-struct-type-property 'keyring keyring-funcs-guard))
 
-(define (make-struct-property-shim slot)
-  (lambda (obj . args)
-    (define desc (prop-keyring-funcs obj))
-    (define method ((vector-ref desc slot) obj))
-    (apply method obj args)))
+(define ((make-struct-property-shim slot) obj . args)
+  (define desc (prop-keyring-funcs obj))
+  (define method ((vector-ref desc slot) obj))
+  (apply method obj args))
 
 (define get-password/prop     (make-struct-property-shim 0))
 (define set-password!/prop    (make-struct-property-shim 1))
