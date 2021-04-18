@@ -17,9 +17,9 @@
      (cond
        [(bytes? password) password]
        [else
-         (log-keyring-warning "backend=~a, action=~a, status=~a"
-                              'keychain 'get-password password)
-         #f]))
+        (log-keyring-warning "backend=~a, action=~a, status=~a"
+                             'keychain 'get-password password)
+        #f]))
 
    (define (set-password! kr service-name username password)
      (define kc (keychain-keyring-kc kr))

@@ -96,7 +96,7 @@
               (sec-keychain-item-free-content raw-password)
               password]
              [else
-               (dict-ref sec-keychain-status-codes status status)]))
+              (dict-ref sec-keychain-status-codes status status)]))
   #:wrap
   (lambda (inner)
     (lambda (kc service-name username)
@@ -172,13 +172,13 @@
       (define kc (sec-keychain-open test-keychain-path))
       (define item (sec-keychain-find-generic-item kc "test1" "test"))
       (check-equal?
-        (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
+       (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
       (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
                     #"xyz123"))
 
     (let ()
       (define kc (sec-keychain-open test-keychain-path))
       (check-equal? (sec-keychain-item-delete
-                      (sec-keychain-find-generic-item kc "test1" "test"))
+                     (sec-keychain-find-generic-item kc "test1" "test"))
                     'ok))))
 

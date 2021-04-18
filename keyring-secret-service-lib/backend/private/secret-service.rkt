@@ -28,7 +28,7 @@
       (make-secret-object secret-item% path))
 
     (super-new
-      [endpoint secret-service-dbus-endpoint])))
+     [endpoint secret-service-dbus-endpoint])))
 
 (define-dbus-interface
   secret-service-mixin "org.freedesktop.Secret.Service"
@@ -172,16 +172,16 @@
               "path='" path "'"))
         (define (wait-for-prompt)
           (sync (handle-evt
-                  (dbus-listen-evt connection)
-                  (lambda (v)
-                    (match v
-                      [(list (== path)
-                             "org.freedesktop.Secret.Prompt"
-                             "Completed"
-                             (list 'signal dismissed? result))
-                       (remove-match)
-                       (if dismissed? #f result)]
-                      [_ (wait-for-prompt)])))))
+                 (dbus-listen-evt connection)
+                 (lambda (v)
+                   (match v
+                     [(list (== path)
+                            "org.freedesktop.Secret.Prompt"
+                            "Completed"
+                            (list 'signal dismissed? result))
+                      (remove-match)
+                      (if dismissed? #f result)]
+                     [_ (wait-for-prompt)])))))
         (define (remove-match)
           (send (get-field bus service) RemoveMatch prompt-completed-rule))
         (send (get-field bus service) AddMatch prompt-completed-rule)
@@ -191,11 +191,11 @@
 (define secret-service-keyring%
   (class* object% (keyring<%>)
     (init-field [connection
-                  (or (current-dbus-connection)
-                      (dbus-connect-session-bus))])
+                 (or (current-dbus-connection)
+                     (dbus-connect-session-bus))])
 
     (init [secret-collection-path
-            "/org/freedesktop/secrets/collection/login"])
+           "/org/freedesktop/secrets/collection/login"])
 
     (define secret-service
       (new secret-service%

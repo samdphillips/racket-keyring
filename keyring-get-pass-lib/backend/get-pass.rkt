@@ -30,8 +30,8 @@
          (format "~a/~a password: " service username))
        (define password
          (call-with-semaphore
-           get-pass-semaphore
-           (lambda () (get-pass prompt-string))))
+          get-pass-semaphore
+          (lambda () (get-pass prompt-string))))
        (string->bytes/utf-8 password))
      (cond
        [(not (get-pass-keyring-cache kr))

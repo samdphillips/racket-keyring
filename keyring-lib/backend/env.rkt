@@ -9,29 +9,29 @@
     (if (zero? (string-length s)) "" (string-append "_" s)))
   (define key
     (string->bytes/utf-8
-      (string-append
-        (env-keyring-base-key keyring)
-        (keypart service-name)
-        (keypart username))))
+     (string-append
+      (env-keyring-base-key keyring)
+      (keypart service-name)
+      (keypart username))))
   (log-keyring-debug "using env key ~s to lookup secret" key)
   key)
 
 (define (env-get-password keyring service-name username)
   (environment-variables-ref
-    (current-environment-variables)
-    (build-env-key keyring service-name username)))
+   (current-environment-variables)
+   (build-env-key keyring service-name username)))
 
 (define (env-set-password! keyring service-name username password)
   (environment-variables-set!
-    (current-environment-variables)
-    (build-env-key keyring service-name username)
-    password))
+   (current-environment-variables)
+   (build-env-key keyring service-name username)
+   password))
 
 (define (env-delete-password! keyring service-name username)
   (environment-variables-set!
-    (current-environment-variables)
-    (build-env-key keyring service-name username)
-    #f))
+   (current-environment-variables)
+   (build-env-key keyring service-name username)
+   #f))
 
 (struct env-keyring [base-key]
   #:methods
@@ -47,10 +47,10 @@
   (require keyring
            rackunit)
   (parameterize ([current-environment-variables
-                   (make-environment-variables
-                     #"SECRET_foo_bar1" #"baz1"
-                     #"SECRET_foo_bar2" #"baz2"
-                     #"SECRET_bar" #"baz")])
+                  (make-environment-variables
+                   #"SECRET_foo_bar1" #"baz1"
+                   #"SECRET_foo_bar2" #"baz2"
+                   #"SECRET_bar" #"baz")])
     (with-keyring "env://?prefix=SECRET"
       (check-equal? (get-password "foo" "bar1") #"baz1")
       (check-false  (get-password "foo" "oops"))
