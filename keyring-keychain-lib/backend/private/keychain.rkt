@@ -20,9 +20,13 @@
 ;; Use of the `keychain-test` submodule instead of the standard `test`
 ;; submodule is to subvert the package server from running this module.  The
 ;; package server runs Linux and this will always fail there.
-(module test racket/base)
+;; Also the package server considers the keychain-test submodule a run-time
+;; module and will warn about a missing package dependency on rackunit-lib.
+(module test racket/base
+  (require rackunit)
+  (provide (all-from-out rackunit)))
 (module+ keychain-test
-  (require rackunit))
+  (require (submod ".." test)))
 
 (define core-lib
   (ffi-lib "/System/Library/Frameworks/CoreServices.framework/CoreServices"))
