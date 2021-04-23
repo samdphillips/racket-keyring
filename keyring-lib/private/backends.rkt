@@ -168,7 +168,7 @@
                          (missing-backend-constructor-error
                           'make-keyring-from-string backend-name)))))
   (define-values (kws args) (conform-kwargs make-keyring cfg-kws cfg-args))
-  (log-keyring-debug "making keyring backend=~a args=~a"
+  (log-keyring-info "making keyring backend=~a args=~s"
                      backend-name (map cons kws args))
   (keyword-apply make-keyring kws args null))
 
