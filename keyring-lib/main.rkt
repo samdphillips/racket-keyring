@@ -80,7 +80,8 @@
   (check-keyring 'get-password keyring)
   (define secret ($get-password keyring service-name username))
   (unless secret
-    (log-keyring-debug "password not found"))
+    (log-keyring-warning "password not found\n  service-name: ~a\n  username: ~a"
+                         service-name username))
   secret)
 
 (define (set-password! service-name
