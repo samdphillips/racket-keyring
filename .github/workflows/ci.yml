@@ -1,0 +1,29 @@
+on:
+- push
+jobs:
+  test:
+    strategy:
+      matrix:
+        racket-version: ["stable", "current"]
+        platform: ["ubuntu-latest", "macos-latest"]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@master
+    - name: install racket
+      uses: Bogdanp/setup-racket@v1.4
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        variant: 'CS'
+        version: ${{ matrix.racket-version }}
+    - name: install base package
+      run: raco pkg install --batch --auto ./keyring-lib
+    - name: install keychain package
+      if: ${{ startsWith(matrix.platform, 'macos') }}
+      run: raco pkg install --batch --auto ./keyring-keychain-lib
+    - name: run base tests
+      run: raco test --drdr --package keyring-lib
+    - name: run keychain tests
+      if: ${{ startsWith(matrix.platform, 'macos') }}
+      run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib
