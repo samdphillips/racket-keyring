@@ -1,8 +1,8 @@
 # keyring: a library for uniformly accessing secrets
 
 The keyring library is a library to access various password stores in a uniform
-way.  It is based loosely on the (Python keyring
-library)[https://github.com/jaraco/keyring]
+way.  It is based loosely on the [Python keyring
+library](https://github.com/jaraco/keyring)
 
 Documentation can be found [here](https://docs.racket-lang.org/keyring/index.html)
 
