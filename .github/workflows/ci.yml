@@ -18,7 +18,7 @@ jobs:
         variant: 'CS'
         version: ${{ matrix.racket-version }}
     - name: install base package
-      run: raco pkg install --batch --auto ./keyring-lib
+      run: raco pkg install --batch --auto ./keyring-lib ./keyring
     - name: install keychain package
       if: ${{ startsWith(matrix.platform, 'macos') }}
       run: raco pkg install --batch --auto ./keyring-keychain-lib
