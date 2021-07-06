@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - main
     paths:
       - 'keyring/scribblings/**'
       - '.github/workflows/docs.yml'
