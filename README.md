@@ -4,8 +4,9 @@ The keyring library is a library to access various password stores in a uniform
 way.  It is based loosely on the [Python keyring
 library](https://github.com/jaraco/keyring)
 
-[Release Documentation](https://docs.racket-lang.org/keyring/index.html)
-[Development Documentation](https://samdphillips.github.io/racket-keyring)
+## Documentation
+- [Release Documentation](https://docs.racket-lang.org/keyring/index.html)
+- [Development Documentation](https://samdphillips.github.io/racket-keyring)
 
 ## keyring-keychain-lib
 ### Testing
