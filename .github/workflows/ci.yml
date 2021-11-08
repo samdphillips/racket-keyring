@@ -1,17 +1,19 @@
 on:
-- push
+  push:
+  schedule:
+  - cron: "17 16 * * FRI"
 jobs:
   test:
     strategy:
       matrix:
-        racket-version: ["stable", "current"]
+        racket-version: ["8.1", "8.2", "pre-release", "stable", "current"]
         platform: ["ubuntu-latest", "macos-latest"]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: checkout
       uses: actions/checkout@master
     - name: install racket
-      uses: Bogdanp/setup-racket@v1.5
+      uses: Bogdanp/setup-racket@v1.6.1
       with:
         architecture: 'x64'
         distribution: 'full'
