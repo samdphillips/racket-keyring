@@ -6,8 +6,9 @@ jobs:
   test:
     strategy:
       matrix:
+        racket-variant: ["BC", "CS"]
         racket-version: ["8.1", "8.2", "pre-release", "stable", "current"]
-        platform: ["ubuntu-latest", "macos-latest"]
+        platform: ["ubuntu-latest", "macos-latest"]        
     runs-on: ${{ matrix.platform }}
     steps:
     - name: checkout
@@ -17,7 +18,7 @@ jobs:
       with:
         architecture: 'x64'
         distribution: 'full'
-        variant: 'CS'
+        variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring
