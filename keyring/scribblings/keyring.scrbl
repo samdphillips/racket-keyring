@@ -16,6 +16,11 @@
 @title{keyring: a library for uniformly accessing secrets}
 @author[(author+email "Sam Phillips" "samdphillips@gmail.com")]
 
+@(when (equal? ".github/workflows/docs.yml" (getenv "GITHUB_WORKFLOW"))
+   @para{@bold{WARNING!}  This documentation is for the development version of
+         @racket[keyring].  Release documentation is at
+         @(let ([x "https://docs.racket-lang.org/keyring/index.html"]) (link x x)).})
+
 The @racket[keyring] library is a library to access various password
 stores in a uniform way.  It is based loosely on the
 @link["https://github.com/jaraco/keyring"]{Python keyring library}.
