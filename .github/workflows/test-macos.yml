@@ -1,0 +1,29 @@
+on:
+  push:
+  schedule:
+  - cron: "47 16 * * FRI"
+jobs:
+  test:
+    strategy:
+      matrix:
+        racket-variant: ["BC", "CS"]
+        racket-version: ["8.2", "8.3", "pre-release", "stable", "current"]
+    runs-on: macos-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@master
+    - name: install racket
+      uses: Bogdanp/setup-racket@v1.7
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        variant: ${{ matrix.racket-variant }}
+        version: ${{ matrix.racket-version }}
+    - name: install base package
+      run: raco pkg install --batch --auto ./keyring-lib ./keyring
+    - name: install keychain package
+      run: raco pkg install --batch --auto ./keyring-keychain-lib
+    - name: run base tests
+      run: raco test --drdr --package keyring-lib
+    - name: run keychain tests
+      run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib

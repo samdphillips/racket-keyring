@@ -7,9 +7,8 @@ jobs:
     strategy:
       matrix:
         racket-variant: ["BC", "CS"]
-        racket-version: ["8.1", "8.2", "pre-release", "stable", "current"]
-        platform: ["ubuntu-latest", "macos-latest"]        
-    runs-on: ${{ matrix.platform }}
+        racket-version: ["8.2", "8.3", "pre-release", "stable", "current"]
+    runs-on: ubuntu-latest
     steps:
     - name: checkout
       uses: actions/checkout@master
@@ -22,11 +21,5 @@ jobs:
         version: ${{ matrix.racket-version }}
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring
-    - name: install keychain package
-      if: ${{ startsWith(matrix.platform, 'macos') }}
-      run: raco pkg install --batch --auto ./keyring-keychain-lib
     - name: run base tests
       run: raco test --drdr --package keyring-lib
-    - name: run keychain tests
-      if: ${{ startsWith(matrix.platform, 'macos') }}
-      run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib
