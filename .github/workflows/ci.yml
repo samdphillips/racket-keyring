@@ -8,7 +8,7 @@ jobs:
       matrix:
         racket-variant: ["BC", "CS"]
         racket-version: ["8.1", "8.2", "pre-release", "stable", "current"]
-        platform: ["ubuntu-latest", "macos-latest"]        
+        platform: ["ubuntu-latest", "macos-10.15"]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: checkout
