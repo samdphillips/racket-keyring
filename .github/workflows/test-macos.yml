@@ -1,15 +1,14 @@
 on:
   push:
   schedule:
-  - cron: "17 16 * * FRI"
+  - cron: "47 16 * * FRI"
 jobs:
   test:
     strategy:
       matrix:
         racket-variant: ["BC", "CS"]
-        racket-version: ["8.1", "8.2", "pre-release", "stable", "current"]
-        platform: ["ubuntu-latest", "macos-10.15"]
-    runs-on: ${{ matrix.platform }}
+        racket-version: ["8.2", "8.3", "pre-release", "stable", "current"]
+    runs-on: macos-10.15
     steps:
     - name: checkout
       uses: actions/checkout@master
@@ -23,10 +22,8 @@ jobs:
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring
     - name: install keychain package
-      if: ${{ startsWith(matrix.platform, 'macos') }}
       run: raco pkg install --batch --auto ./keyring-keychain-lib
     - name: run base tests
       run: raco test --drdr --package keyring-lib
     - name: run keychain tests
-      if: ${{ startsWith(matrix.platform, 'macos') }}
       run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib
