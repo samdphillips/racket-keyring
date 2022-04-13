@@ -1,5 +1,8 @@
 # keyring: a library for uniformly accessing secrets
 
+![Linux build badge](https://github.com/samdphillips/racket-keyring/actions/workflows/test-linux.yml/badge.svg)
+![Macos build badge](https://github.com/samdphillips/racket-keyring/actions/workflows/test-macos.yml/badge.svg)
+
 The keyring library is a library to access various password stores in a uniform
 way.  It is based loosely on the [Python keyring
 library](https://github.com/jaraco/keyring)
