@@ -23,7 +23,7 @@ jobs:
     - name: build docs
       run: scribble +m --redirect-main http://pkg-build.racket-lang.org/doc/ --htmls --dest ./docs ./keyring/scribblings/keyring.scrbl
     - name: push to gh-pages
-      uses: JamesIves/github-pages-deploy-action@4.4.0
+      uses: JamesIves/github-pages-deploy-action@v4.4.0
       with:
         folder: docs/keyring
         branch: gh-pages
