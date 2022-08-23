@@ -12,7 +12,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@master
     - name: install racket
-      uses: Bogdanp/setup-racket@v1.7
+      uses: Bogdanp/setup-racket@v1.8.1
       with:
         architecture: 'x64'
         distribution: 'full'
@@ -23,7 +23,7 @@ jobs:
     - name: build docs
       run: scribble +m --redirect-main http://pkg-build.racket-lang.org/doc/ --htmls --dest ./docs ./keyring/scribblings/keyring.scrbl
     - name: push to gh-pages
-      uses: JamesIves/github-pages-deploy-action@4.1.4
+      uses: JamesIves/github-pages-deploy-action@4.4.0
       with:
         folder: docs/keyring
         branch: gh-pages
