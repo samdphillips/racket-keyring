@@ -2,7 +2,7 @@
 
 (define name "keyring")
 (define collection "keyring")
-(define version "0.10")
+(define version "0.10.1")
 (define deps '("base" "keyring-lib"))
 (define implies '("keyring-lib"))
 (define build-deps '("base" "keyring-lib" "racket-doc" "scribble-lib"))
