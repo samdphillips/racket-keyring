@@ -6,3 +6,4 @@
 (define deps '("base" "get-pass" "keyring-lib"))
 (define build-deps '("base" "rackunit-lib"))
 (define pkg-authors '(samdphillips@gmail.com))
+(define license 'Apache-2.0)
