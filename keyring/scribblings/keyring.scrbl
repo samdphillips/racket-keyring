@@ -144,3 +144,5 @@ stores which can be installed separately.
                [username string?])
              void?]
 }
+
+@include-section["changelog.scrbl"]

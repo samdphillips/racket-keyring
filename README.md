@@ -16,3 +16,42 @@ library](https://github.com/jaraco/keyring)
    MACOSX_TEST_KEYCHAIN=$HOME/test.keychain raco test -s keychain-test -p keyring-keychain-lib
    ```
 
+# Changelog
+
+## 0.10.1
+
+Release date: 2022/11/09
+
+* Add license metadata to packages.
+
+* Regular Github Actions testing setup.
+
+* Logging changes.
+
+## 0.10.0
+
+Release date: 2021/04/18
+
+* Code cleanups.
+
+* Logging improvements.
+
+## 0.9.0
+
+Release date: 2021/02/26
+
+* A raco command for accessing the keyrings.
+
+* A backend system that works with classes, generics, or plain structs.
+
+* Implemented Backends
+
+  * Mac OSX Keychain backend
+
+  * Secret Service backend
+
+  * environment variable backend
+
+  * get-pass backend
+
+* Environment based configuration
