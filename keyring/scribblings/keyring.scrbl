@@ -91,6 +91,11 @@ stores which can be installed separately.
 
 @defproc[(keyring-error? [v any/c]) boolean?]
 
+@defproc[(keyring-error-message [e keyring-error?])
+         string?]{
+  An alias for @racket[exn-message].
+}
+
 @defproc[(keyring-backend-error? [v any/c]) boolean?]
 
 @defproc[(keyring-backend-error-name [e keyring-backend-error?])

@@ -20,6 +20,8 @@
  raise-backend-error
  raise-backend-load-error
 
+(rename-out [exn-message keyring-error-message])
+
  (struct-out keyring-error)
  (struct-out keyring-backend-error)
  (struct-out keyring-backend-load-error))

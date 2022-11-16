@@ -25,6 +25,7 @@
          with-keyring
 
          keyring-error?
+         keyring-error-message
          keyring-backend-error?
          keyring-backend-error-name
          keyring-backend-load-error?
