@@ -52,7 +52,7 @@
      (unless (eq? 'ok status)
        (raise-backend-error 'set-password!
                             "error setting password"
-                            'keychain
+                            "keychain"
                             (append (list (cons 'error-code status))
                                     (if method
                                         (list (cons 'method method))
@@ -67,7 +67,7 @@
      (unless (or (eq? 'ok status) (eq? 'item-not-found status))
        (raise-backend-error 'remove-password!
                             "error removing password"
-                            'keychain
+                            "keychain"
                             (list (cons 'error-code status)))))])
 
 (define (make-keyring #:path [path #f])
@@ -76,4 +76,3 @@
         (sec-keychain-open path)
         (sec-keychain-copy-default)))
   (keychain-keyring kc))
-

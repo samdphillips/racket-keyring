@@ -40,7 +40,9 @@
                     [get-password     $get-password]
                     [set-password!    $set-password!]
                     [delete-password! $delete-password!])
-         keyring/private/error
+         (only-in keyring/private/error
+                  keyring-error
+                  keyring-error-message)
          keyring/private/backends)
 
 (define (maybe-initialize-default-keyring)

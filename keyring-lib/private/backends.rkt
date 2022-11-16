@@ -26,8 +26,7 @@
          racket/format
          racket/match
          racket/string
-         keyring/interface
-         keyring/private/error)
+         keyring/interface)
 
 (module+ test
   (require rackunit
