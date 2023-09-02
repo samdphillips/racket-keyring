@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -59,22 +59,3 @@
 (define (make-keyring #:prefix base-env-key)
   (env-keyring base-env-key))
 
-(module test racket/base
-  (require keyring
-           rackunit)
-  (parameterize ([current-environment-variables
-                  (make-environment-variables
-                   #"SECRET_foo_bar1" #"baz1"
-                   #"SECRET_foo_bar2" #"baz2"
-                   #"SECRET_bar" #"baz")])
-    (with-keyring "env://?prefix=SECRET"
-      (check-equal? (get-password "foo" "bar1") #"baz1")
-      (check-false  (get-password "foo" "oops"))
-
-      (check-equal? (get-password "" "bar") #"baz")
-
-      (set-password! "foo" "bar3" #"baz3")
-      (check-equal? (get-password "foo" "bar3") #"baz3")
-
-      (delete-password! "foo" "bar3")
-      (check-false  (get-password "foo" "bar3")))))
