@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,10 +29,6 @@
          keyring/interface
          keyring/private/error)
 
-(module+ test
-  (require rackunit
-           keyring/interface))
-
 (define (url-path-as-pathstring a-url)
   (define paths
     (for/list ([pp (in-list (url-path a-url))]) (path/param-path pp)))
@@ -48,6 +44,8 @@
         (cons url-host-not-empty '#:host)
         (cons url-port '#:port)
         (cons url-path-as-pathstring '#:path)))
+
+(module+ for-test (provide parse-backend-connect-string))
 
 (define (parse-backend-connect-string conn-string)
   (define u (string->url conn-string))
@@ -69,14 +67,6 @@
           #:key car))
   (values (url-scheme u) (map car kwargs) (map cdr kwargs)))
 
-(module+ test
-  (test-case "parse-backend-connect-string"
-    (define s "fake-backend:///all/passwords?token=cafebabe")
-    (define-values (backend kws args) (parse-backend-connect-string s))
-    (check-equal? backend "fake-backend")
-    (check-equal? kws (list '#:path '#:token))
-    (check-equal? args (list "/all/passwords" "cafebabe"))))
-
 (define (remove-extra-kwargs accepted-kws kws args)
   (cond
     [(or (null? accepted-kws) (null? kws)) (values null null)]
@@ -93,41 +83,13 @@
        [else
         (remove-extra-kwargs accepted-kws (cdr kws) (cdr args))])]))
 
+(module+ for-test (provide conform-kwargs))
+
 (define (conform-kwargs proc kws args)
   (define-values (_reqd-kws accepted-kws) (procedure-keywords proc))
   (cond
     [(not accepted-kws) (values kws args)]
     [else (remove-extra-kwargs accepted-kws kws args)]))
-
-(module+ test
-  (define (test-kw-proc #:host h #:path p #:token t) #f)
-
-  (test-case "conform-kwargs all present"
-    (define-values (kws args)
-      (conform-kwargs test-kw-proc
-                      (list '#:host '#:path '#:token)
-                      (list 1 2 3)))
-    (check-equal? kws '(#:host #:path #:token))
-    (check-equal? args '(1 2 3)))
-
-  (test-case "conform-kwargs extras a removed" #f)
-
-  (test-case "conform-kwargs any args"
-    (define-values (kws args)
-      (conform-kwargs (make-keyword-procedure
-                       (lambda (kws args) #f))
-                      (list '#:host '#:path '#:token)
-                      (list 1 2 3)))
-    (check-equal? kws '(#:host #:path #:token))
-    (check-equal? args '(1 2 3)))
-
-  (test-case "conform-kwargs procedure with no args"
-    (define-values (kws args)
-      (conform-kwargs (lambda () #f)
-                      (list '#:host '#:path '#:token)
-                      (list 1 2 3)))
-    (check-equal? kws null)
-    (check-equal? args null)))
 
 (define (make-backend-module-path backend-name)
   (string->symbol
@@ -187,48 +149,3 @@
   (log-keyring-info "making keyring backend=~a args=~s"
                      backend-name (map cons kws args))
   (keyword-apply make-keyring kws args null))
-
-(module+ test
-  (test-case "make-keyring-from-string missing backend"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (equal? (keyring-backend-load-error-name e) "nosuch")))
-     (lambda ()
-       (make-keyring-from-string "nosuch:"))))
-
-  (test-case "make-keyring-from-string backend w/o constructor"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match?
-             #px"backend does not provide a make-keyring procedure"
-             (exn-message e))
-            (equal? (keyring-backend-load-error-name e) "test-no-constr")))
-     (lambda ()
-       (make-keyring-from-string "test-no-constr:"))))
-
-  (test-case "make-keyring-from-string backend no backend specified"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match? #px"no backend specified" (exn-message e))
-            (equal? (keyring-backend-load-error-name e) #f)))
-     (lambda ()
-       (make-keyring-from-string "test"))))
-
-  (test-case "make-keyring-from-string backend invalid scheme"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match? #px"invalid URL string" (exn-message e))
-            (equal? (keyring-backend-load-error-name e) #f)))
-     (lambda ()
-       (make-keyring-from-string "xxx;yyy://test"))))
-
-  (test-case "make-keyring-from-string test backend"
-    (define keyring
-      (make-keyring-from-string
-       "test://?service=test-service&username=userA&password=abc123"))
-    (check-equal? (get-password keyring "test-service" "userA") #"abc123")))
-
