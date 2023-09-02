@@ -21,10 +21,10 @@ jobs:
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
     - name: install base package
-      run: raco pkg install --batch --auto ./keyring-lib ./keyring
+      run: raco pkg install --batch --auto ./keyring-lib ./keyring-test ./keyring
     - name: install keychain package
       run: raco pkg install --batch --auto ./keyring-keychain-lib
     - name: run base tests
-      run: raco test --drdr --package keyring-lib
+      run: raco test --drdr --package keyring-test
     - name: run keychain tests
       run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib
