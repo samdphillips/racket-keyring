@@ -25,8 +25,8 @@ jobs:
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring-test ./keyring
     - name: install keychain package
-      run: raco pkg install --batch --auto ./keyring-keychain-lib
+      run: raco pkg install --batch --auto ./keyring-keychain-lib ./keyring-keychain-test
     - name: run base tests
       run: raco test --drdr --package keyring-test
     - name: run keychain tests
-      run: raco test --drdr --submodule keychain-test --package keyring-keychain-lib
+      run: raco test --drdr --submodule keychain-test --package keyring-keychain-test

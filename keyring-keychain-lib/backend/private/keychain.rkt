@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,17 +33,6 @@
          ffi/unsafe/define
          ffi/unsafe/define/conventions)
 
-;; Use of the `keychain-test` submodule instead of the standard `test`
-;; submodule is to subvert the package server from running this module.  The
-;; package server runs Linux and this will always fail there.
-;; Also the package server considers the keychain-test submodule a run-time
-;; module and will warn about a missing package dependency on rackunit-lib.
-(module test racket/base
-  (require rackunit)
-  (provide (all-from-out rackunit)))
-(module+ keychain-test
-  (require (submod ".." test)))
-
 (define core-lib
   (ffi-lib "/System/Library/Frameworks/CoreServices.framework/CoreServices"))
 
@@ -60,12 +49,15 @@
   '([0      . ok]
     [-25300 . item-not-found]
     [-128   . keychain-denied]
+    [-25299 . duplicate-item]
     [-25293 . sec_auth_failed]))
 
 (define (status-or-value status value)
   (if (zero? status)
       value
       (dict-ref sec-keychain-status-codes status status)))
+
+(module+ for-test (provide sec-keychain?))
 
 (define-cpointer-type _sec-keychain)
 (define-cpointer-type _sec-keychain-item)
@@ -171,39 +163,3 @@
   (_fun _sec-keychain-item
         -> [status : _int32]
         -> (dict-ref sec-keychain-status-codes status status)))
-
-(module+ keychain-test
-  (define get-keychain
-    (let ([path (getenv "MACOSX_TEST_KEYCHAIN")])
-      (if path
-          (let ([path (path->complete-path path)])
-            (lambda ()
-              (define kc (sec-keychain-open path))
-              (check-pred sec-keychain? kc)
-              kc))
-          (lambda ()
-            (define kc (sec-keychain-copy-default))
-            (check-pred sec-keychain? kc)
-            kc))))
-
-  (test-case "sec-keychain-add-generic-password"
-    (define kc (get-keychain))
-    (check-equal? (sec-keychain-add-generic-password kc "test1" "test" #"abc123")
-                  'ok)
-    (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
-                  #"abc123"))
-
-  (test-case "sec-keychain-item-modify-attributes-and-data"
-    (define kc (get-keychain))
-    (define item (sec-keychain-find-generic-item kc "test1" "test"))
-    (check-equal?
-     (sec-keychain-item-modify-attributes-and-data item #"xyz123") 'ok)
-    (check-equal? (sec-keychain-find-generic-password kc "test1" "test")
-                  #"xyz123"))
-
-  (let ()
-    (define kc (get-keychain))
-    (check-equal? (sec-keychain-item-delete
-                   (sec-keychain-find-generic-item kc "test1" "test"))
-                  'ok)))
-
