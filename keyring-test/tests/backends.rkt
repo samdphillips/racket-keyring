@@ -16,7 +16,7 @@
    limitations under the License.
 |#
 
-(module+ test
+(module test racket/base
   (require rackunit
            keyring/interface
            keyring/private/error
