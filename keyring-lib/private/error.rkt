@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,16 +19,30 @@
 (provide
  raise-backend-error
  raise-backend-load-error
+ raise-unimplemented
 
  (struct-out keyring-error)
+ (struct-out keyring-unimplemented)
  (struct-out keyring-backend-error)
  (struct-out keyring-backend-load-error))
 
-(require racket/format)
+(require racket/format
+         unstable/error)
 
 (struct keyring-error              exn:fail      [])
+(struct keyring-unimplemented      keyring-error [name])
 (struct keyring-backend-error      keyring-error [name])
 (struct keyring-backend-load-error keyring-error [name])
+
+(define (raise-unimplemented who obj)
+  (define message
+    (compose-error-message who
+                           "keyring interface unimplemented"
+                           "object" obj))
+  (raise (keyring-unimplemented message
+                                (current-continuation-marks)
+                                who)))
+
 
 (define (raise-backend-error who msg [backend #f] [details null])
   (define full-message

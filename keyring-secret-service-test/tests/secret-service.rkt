@@ -18,7 +18,7 @@
 
 (module test racket/base
   (require dbus
-           keyring/interface
+           keyring
            racket/class
            rackunit
            (submod keyring/backend/private/secret-service for-test))

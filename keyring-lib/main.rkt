@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
    limitations under the License.
 |#
 
+(require racket/contract)
+
 (provide keyring?
-         get-password
-         set-password!
-         delete-password!
-         make-keyring-from-string
-         default-keyring
+         (contract-out
+          [get-password
+           (->* (string? string?) (#:keyring keyring?) (or/c #f bytes?))]
+          [set-password!
+           (->* (string? string? bytes?) (#:keyring keyring?) any)]
+          [delete-password!
+           (->* (string? string?) (#:keyring keyring?) any)]
+          [make-keyring-from-string (-> string? keyring?)]
+          [default-keyring (parameter/c (or/c #f keyring?))])
+
          with-keyring
 
          keyring-error?
@@ -35,10 +42,6 @@
          syntax/parse/define
 
          keyring/interface
-         (rename-in keyring/interface
-                    [get-password     $get-password]
-                    [set-password!    $set-password!]
-                    [delete-password! $delete-password!])
          keyring/private/error
          keyring/private/backends)
 
@@ -88,6 +91,16 @@
         "keyring library or initialize a keyring with "
         "make-keyring-from-string")))
     (raise (keyring-error msg (current-continuation-marks)))))
+
+(define-syntax-parse-rule (bouncer $name:id p)
+  (define-syntax-parse-rule ($name kr:id . args)
+    (let* ([tbl (keyring-funcs kr)]
+           [f (vector-ref tbl p)])
+      (f kr . args))))
+
+(bouncer $get-password     0)
+(bouncer $set-password!    1)
+(bouncer $delete-password! 2)
 
 (define (get-password service-name
                       username

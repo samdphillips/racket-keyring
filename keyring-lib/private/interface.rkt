@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,77 +20,87 @@
          prop:keyring
          gen:keyring
 
-         keyring?
-         get-password
-         set-password!
-         delete-password!)
+         keyring-funcs
+         (rename-out [-keyring? keyring?]))
 
-(require racket/class
-         racket/function
-         racket/generic
-         racket/match)
-
-
-;;
-;; class based keyring interface
-
-(define keyring<%>
-  (interface ()
-    get-password
-    set-password!
-    delete-password!))
-
-(define (object-keyring? v)
-  (is-a? v keyring<%>))
-
-(define (make-object-keyring-shim method-name)
-  (define method-generic (make-generic keyring<%> method-name))
-  (lambda (keyring . args)
-    (send-generic keyring method-generic . args)))
-
-(define get-password/obj     (make-object-keyring-shim 'get-password))
-(define set-password!/obj    (make-object-keyring-shim 'set-password!))
-(define delete-password!/obj (make-object-keyring-shim 'delete-password!))
+(require keyring/private/error
+         racket/class
+         racket/format
+         racket/generic)
 
 
 ;;
 ;; struct property based interface for low-level struct hackers
 
-(define (keyring-funcs-guard vec stype-info)
-  (match-define (list _ _ _ ref _ ...) stype-info)
-  (for/vector #:length 3 ([v (in-vector vec)])
-    (cond
-      [(procedure? v) (const v)]
-      [else
-       (lambda (o) (ref o v))])))
+(define (keyring-property-guard v info)
+  (define who 'prop:keyring)
+  (define (guard-property-slot field i arity)
+    (let ([p (vector-ref v i)])
+      (cond
+        [(not p)
+         (λ (o . args)
+           (raise-unimplemented field o))]
+        [(and (procedure? p)
+              (procedure-arity-includes? p arity))
+         p]
+        [(exact-nonnegative-integer? p)
+         (define init-count (list-ref info 1))
+         (unless (< p init-count)
+           (raise-arguments-error
+            who
+            "field index >= initialized-field count for structure type"
+            "field index" p
+            "initialized-field count" init-count))
+         (define ref (list-ref info 3))
+         (λ (o . args) (apply (ref o p) args))]
+        [else
+         (raise-arguments-error
+          who
+          (format "(or/c (procedure-arity-includes/c ~a) exact-nonnegative-integer? #f)" arity)
+          "prop-field" field
+          "prop-field-value" p)])))
+  (unless (and (vector? v) (= 3 (vector-length v)))
+    (raise-argument-error
+     who
+     "(vector/c (or/c procedure? exact-nonnegative-integer? #f) (or/c procedure? exact-nonnegative-integer? #f) (or/c procedure? exact-nonnegative-integer? #f))"
+     v))
+  (vector (guard-property-slot 'get-password     0 3)
+          (guard-property-slot 'set-password!    1 4)
+          (guard-property-slot 'delete-password! 2 3)))
 
-(define-values (prop:keyring prop:keyring? prop-keyring-funcs)
-  (make-struct-type-property 'keyring keyring-funcs-guard))
+(define-values (prop:keyring prop:keyring? keyring-funcs)
+  (make-struct-type-property 'keyring keyring-property-guard))
 
-(define ((make-struct-property-shim slot) obj . args)
-  (define desc (prop-keyring-funcs obj))
-  (define method ((vector-ref desc slot) obj))
-  (apply method obj args))
+(define -keyring? (procedure-rename prop:keyring? 'keyring?))
 
-(define get-password/prop     (make-struct-property-shim 0))
-(define set-password!/prop    (make-struct-property-shim 1))
-(define delete-password!/prop (make-struct-property-shim 2))
+;;
+;; class based keyring interface
+(define keyring<%>
+  (interface*
+   ()
+   ([prop:keyring
+     (vector (λ (kr service username)
+               (send kr get-password service username))
+             (λ (kr service username password)
+               (send kr set-password! service username password))
+             (λ (kr service username)
+               (send kr delete-password! service username)))])
+   get-password
+   set-password!
+   delete-password!))
 
 
 ;;
-;; struct generics to tie the room together
-
+;; struct generics
 (define-generics keyring
   [get-password     keyring service username]
   [set-password!    keyring service username password]
   [delete-password! keyring service username]
-  #:defaults
-  ([object-keyring?
-    (define get-password     get-password/obj)
-    (define set-password!    set-password!/obj)
-    (define delete-password! delete-password!/obj)]
-   [prop:keyring?
-    (define get-password     get-password/prop)
-    (define set-password!    set-password!/prop)
-    (define delete-password! delete-password!/prop)]))
-
+  #:derive-property
+  prop:keyring
+  (vector (λ (kr service username)
+            (get-password kr service username))
+          (λ (kr service username password)
+            (set-password! kr service username password))
+          (λ (kr service username)
+            (delete-password! kr service username))))

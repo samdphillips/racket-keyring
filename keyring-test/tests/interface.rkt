@@ -16,41 +16,42 @@
    limitations under the License.
 |#
 
-(require keyring/interface
+(require keyring
          rackunit)
 
 (define (test-keyring name make specific?)
-  (define kr (make))
   (test-case name
-    (check-pred specific? kr "keyring is not the specific type")
-    (check-pred keyring? kr "keyring is not a keyring?")
+    (with-keyring (make)
+      (check-pred specific? (default-keyring)
+                  "keyring is not the specific type")
 
-    (check-false (get-password kr "testservice" "testuser1")
-                 "testservice/testuser1 are in use")
-    (set-password! kr "testservice" "testuser1" #"secret1")
-    (check-equal? #"secret1"
-                  (get-password kr "testservice" "testuser1")
-                  "testservice/testuser1 secret incorrect")
+      (check-false (get-password "testservice" "testuser1")
+                   "testservice/testuser1 are in use")
+      (set-password! "testservice" "testuser1" #"secret1")
+      (check-equal? #"secret1"
+                    (get-password "testservice" "testuser1")
+                    "testservice/testuser1 secret incorrect")
 
-    (check-false (get-password kr "testservice" "testuser2")
-                 "testservice/testuser2 are in use")
-    (set-password! kr "testservice" "testuser2" #"secret2")
-    (check-equal? #"secret1"
-                  (get-password kr "testservice" "testuser1")
-                  "testservice/testuser1 secret incorrect")
-    (check-equal? #"secret2"
-                  (get-password kr "testservice" "testuser2")
-                  "testservice/testuser2 secret incorrect")
+      (check-false (get-password "testservice" "testuser2")
+                   "testservice/testuser2 are in use")
+      (set-password! "testservice" "testuser2" #"secret2")
+      (check-equal? #"secret1"
+                    (get-password "testservice" "testuser1")
+                    "testservice/testuser1 secret incorrect")
+      (check-equal? #"secret2"
+                    (get-password "testservice" "testuser2")
+                    "testservice/testuser2 secret incorrect")
 
-    (delete-password! kr "testservice" "testuser1")
-    (check-false (get-password kr "testservice" "testuser1")
-                 "testservice/testuser1 user not removed")
-    (check-equal? #"secret2"
-                  (get-password kr "testservice" "testuser2")
-                  "testservice/testuser2 secret incorrect")))
+      (delete-password! "testservice" "testuser1")
+      (check-false (get-password "testservice" "testuser1")
+                   "testservice/testuser1 user not removed")
+      (check-equal? #"secret2"
+                    (get-password "testservice" "testuser2")
+                    "testservice/testuser2 secret incorrect"))))
 
 (module* test #f
-  (require racket/class)
+  (require keyring/interface
+           racket/class)
 
   (struct st:keyring (store)
     #:property

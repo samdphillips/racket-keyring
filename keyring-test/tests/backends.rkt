@@ -18,9 +18,8 @@
 
 (module test racket/base
   (require rackunit
-           keyring/interface
+           keyring
            keyring/private/error
-           keyring/private/backends
            (submod keyring/private/backends for-test))
 
   (test-case "parse-backend-connect-string"
@@ -100,4 +99,4 @@
     (define keyring
       (make-keyring-from-string
        "test://?service=test-service&username=userA&password=abc123"))
-    (check-equal? (get-password keyring "test-service" "userA") #"abc123")))
+    (check-equal? (get-password #:keyring keyring "test-service" "userA") #"abc123")))

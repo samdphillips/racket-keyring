@@ -1,7 +1,7 @@
 #lang racket/base
 
 #|
-   Copyright 2020-2021 Sam Phillips <samdphillips@gmail.com>
+   Copyright 2020-2023 Sam Phillips <samdphillips@gmail.com>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,10 +26,7 @@
  gen:keyring
 
  keyring?
- (contract-out
-  [get-password     (-> keyring? string? string? (or/c #f bytes?))]
-  [set-password!    (-> keyring? string? string? bytes? any)]
-  [delete-password! (-> keyring? string? string? any)])
+ keyring-funcs
 
  raise-backend-error
  raise-backend-load-error
