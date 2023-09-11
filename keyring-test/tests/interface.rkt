@@ -54,8 +54,7 @@
            racket/class)
 
   (struct st:keyring (store)
-    #:property
-    prop:keyring
+    #:property prop:keyring
     (vector (λ (kr service username)
               (hash-ref (st:keyring-store kr) (cons service username) #f))
             (λ (kr service username password)
@@ -67,9 +66,22 @@
 
   (test-keyring "struct property keyring" make-st:keyring st:keyring?)
 
+  (struct sti:keyring (get set remove)
+    #:property prop:keyring (vector 0 1 2))
+
+  (define (make-sti:keyring)
+    (define store (make-hash))
+    (sti:keyring (λ (kr service username)
+                   (hash-ref store (cons service username) #f))
+                 (λ (kr service username password)
+                   (hash-set! store (cons service username) password))
+                 (λ (kr service username)
+                   (hash-remove! store (cons service username)))))
+
+  (test-keyring "indexed struct property keyring" make-sti:keyring sti:keyring?)
+
   (struct g:keyring (store)
-    #:methods
-    gen:keyring
+    #:methods gen:keyring
     [(define (get-password kr service username)
        (hash-ref (g:keyring-store kr) (cons service username) #f))
      (define (set-password! kr service username password)

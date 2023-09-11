@@ -27,7 +27,7 @@
           [delete-password!
            (->* (string? string?) (#:keyring keyring?) any)]
           [make-keyring-from-string (-> string? keyring?)]
-          [default-keyring (parameter/c (or/c #f keyring?))])
+          [default-keyring (parameter/c keyring?)])
 
          with-keyring
 
@@ -43,9 +43,12 @@
 
          keyring/interface
          keyring/private/error
-         keyring/private/backends)
+         keyring/private/backends
 
-(define (maybe-initialize-default-keyring)
+         (only-in keyring/backend/null
+                  [make-keyring make-null-keyring]))
+
+(define (initialize-default-keyring)
   (define keyring-spec (getenv "KEYRING"))
   (cond
     [keyring-spec
@@ -56,16 +59,18 @@
                         (log-keyring-error
                          "keyring spec: ~s" keyring-spec)
                         (log-keyring-error (exn->string e))
-                        #f)])
+                        (log-keyring-warning
+                         "default-keyring will be set to the null keyring.")
+                        (make-null-keyring))])
        (make-keyring-from-string keyring-spec))]
     [else
      (log-keyring-warning
       (string-append "KEYRING environment variable not set. "
-                     "No default-keyring will be set up."))
-     #f]))
+                     "default-keyring will be set to the null keyring."))
+     (make-null-keyring)]))
 
 (define default-keyring
-  (make-parameter (maybe-initialize-default-keyring)))
+  (make-parameter (initialize-default-keyring)))
 
 (define-syntax-parser with-keyring
   [(_ s:str body ...+)

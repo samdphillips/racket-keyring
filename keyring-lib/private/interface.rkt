@@ -38,8 +38,10 @@
     (let ([p (vector-ref v i)])
       (cond
         [(not p)
-         (λ (o . args)
-           (raise-unimplemented field o))]
+         (λ (kr . args)
+           (raise-unimplemented field
+                                "keyring interface unimplemented"
+                                kr))]
         [(and (procedure? p)
               (procedure-arity-includes? p arity))
          p]
@@ -52,7 +54,7 @@
             "field index" p
             "initialized-field count" init-count))
          (define ref (list-ref info 3))
-         (λ (o . args) (apply (ref o p) args))]
+         (λ (kr . args) (apply (ref kr p) kr args))]
         [else
          (raise-arguments-error
           who

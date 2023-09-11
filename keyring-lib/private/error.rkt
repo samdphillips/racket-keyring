@@ -34,11 +34,9 @@
 (struct keyring-backend-error      keyring-error [name])
 (struct keyring-backend-load-error keyring-error [name])
 
-(define (raise-unimplemented who obj)
+(define (raise-unimplemented who msg kr)
   (define message
-    (compose-error-message who
-                           "keyring interface unimplemented"
-                           "object" obj))
+    (compose-error-message who msg "keyring" kr))
   (raise (keyring-unimplemented message
                                 (current-continuation-marks)
                                 who)))
