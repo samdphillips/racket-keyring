@@ -27,42 +27,51 @@
  (struct-out keyring-backend-load-error))
 
 (require racket/format
-         unstable/error)
+         racket/string)
 
 (struct keyring-error              exn:fail      [])
 (struct keyring-unimplemented      keyring-error [name])
 (struct keyring-backend-error      keyring-error [name])
 (struct keyring-backend-load-error keyring-error [name])
 
+;; like `compose-error-message` from unstable-lib with less error checking
+(define (compose-error-message name message . fvs)
+  (define details
+    (let build ([fvs fvs])
+      (cond
+        [(null? fvs) null]
+        [else
+         (define field (car fvs))
+         (define value (cadr fvs))
+         (cons (~.a "  " field ": " value)
+               (build (cddr fvs)))])))
+  (string-join
+   (cons (~.a name ": " message (if (null? fvs) "" ";")) details) "\n"))
+
+;; turns ((k1 . v1) (k2 . v2) ...) into (k1 v1 k2 v2 ...)
+(define (flatten-assoc alist)
+  (if (null? alist)
+      null
+      (list* (caar alist)
+             (cdar alist)
+             (flatten-assoc (cdr alist)))))
+
 (define (raise-unimplemented who msg kr)
   (define message
     (compose-error-message who msg "keyring" kr))
-  (raise (keyring-unimplemented message
-                                (current-continuation-marks)
-                                who)))
+  (raise (keyring-unimplemented message (current-continuation-marks) who)))
 
-
-(define (raise-backend-error who msg [backend #f] [details null])
+(define (raise-backend-error who
+                             message
+                             [backend #f]
+                             [details null]
+                             [exc keyring-backend-error])
   (define full-message
-    (apply ~a #:separator "\n"
-           (~.a who ": " msg ";")
-           (~.a "  backend: " backend)
-           (for/list ([kv (in-list details)])
-             (~.a "  " (car kv) ": " (cdr kv)))))
+    (apply compose-error-message
+           who message "backend" backend
+           (flatten-assoc details)))
   (raise
-   (keyring-backend-error full-message
-                          (current-continuation-marks)
-                          backend)))
+   (exc full-message (current-continuation-marks) backend)))
 
-(define (raise-backend-load-error who msg [backend #f] [details null])
-  (define full-message
-    (~a (~.a who ": " msg ";") "\n"
-        (apply ~a #:separator "\n"
-               (~.a "  backend: " backend)
-               (for/list ([kv (in-list details)])
-                 (~.a "  " (car kv) ": " (cdr kv))))))
-  (raise
-   (keyring-backend-load-error full-message
-                               (current-continuation-marks)
-                               backend)))
-
+(define (raise-backend-load-error who message [backend #f] [details null])
+  (raise-backend-error who message backend details keyring-backend-load-error))
