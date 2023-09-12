@@ -53,8 +53,10 @@
             "field index >= initialized-field count for structure type"
             "field index" p
             "initialized-field count" init-count))
-         (define ref (list-ref info 3))
-         (λ (kr . args) (apply (ref kr p) kr args))]
+         (define ref
+           (make-struct-field-accessor (list-ref info 3) p))
+         ;; XXX: check procedure? and arity before running
+         (λ (kr . args) (apply (ref kr) kr args))]
         [else
          (raise-arguments-error
           who
@@ -64,7 +66,9 @@
   (unless (and (vector? v) (= 3 (vector-length v)))
     (raise-argument-error
      who
-     "(vector/c (or/c procedure? exact-nonnegative-integer? #f) (or/c procedure? exact-nonnegative-integer? #f) (or/c procedure? exact-nonnegative-integer? #f))"
+     (string-append "(vector/c (or/c procedure? exact-nonnegative-integer? #f)"
+                    " (or/c procedure? exact-nonnegative-integer? #f)"
+                    " (or/c procedure? exact-nonnegative-integer? #f))")
      v))
   (vector (guard-property-slot 'get-password     0 3)
           (guard-property-slot 'set-password!    1 4)
