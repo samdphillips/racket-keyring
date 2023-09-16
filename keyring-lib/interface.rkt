@@ -18,7 +18,8 @@
 
 (require racket/contract
          "private/error.rkt"
-         "private/interface.rkt")
+         "private/interface.rkt"
+         "private/logger.rkt")
 
 (provide
  keyring<%>
@@ -37,8 +38,4 @@
  log-keyring-warning
  log-keyring-info
  log-keyring-debug)
-
-(define-logger keyring)
-
-;; XXX: logging wrappers that backends can use to have more consistent messages
 
