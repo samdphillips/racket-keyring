@@ -111,20 +111,20 @@ stores which can be installed separately.
 @subsection{Struct Generic Keyring Interface}
 @defidform[gen:keyring]
 
-@defproc[(get-password [keyring keyring?]
-                       [service-name string?]
-                       [username string?])
+@defproc[(get-password-proc [keyring keyring?]
+                            [service-name string?]
+                            [username string?])
          (or/c #f bytes?)]
 
-@defproc[(set-password! [keyring keyring?]
-                        [service-name string?]
-                        [username string?]
-                        [password bytes?])
+@defproc[(set-password-proc! [keyring keyring?]
+                             [service-name string?]
+                             [username string?]
+                             [password bytes?])
          void?]
 
-@defproc[(remove-password! [keyring keyring?]
-                           [service-name string?]
-                           [username string?])
+@defproc[(remove-password-proc! [keyring keyring?]
+                                [service-name string?]
+                                [username string?])
          void?]
 
 @subsection{Class Keyring Interface}

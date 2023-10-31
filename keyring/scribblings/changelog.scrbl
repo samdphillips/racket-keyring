@@ -1,26 +1,25 @@
 #lang scribble/manual
 
-@(require (for-label racket racket/generic))
+@(require (for-label racket racket/generic keyring/interface))
 
 @title{Changelog}
 
 @section{0.11.0}
-Release date: 2023/MM/DD
+Release date: 2023/10/31
 @itemlist[
   @item{Move tests into separate packages.}
   @item{Reorganize the backends around @racket[prop:keyring]}
   @item{Clean up error message formatting.}
+  @item{Log errors from raise procedures.}
   @item{Add @var{null} backend as default when the @envvar{KEYRING}
-        environment variable is not set.}
-]
+        environment variable is not set.}]
 
 @section{0.10.1}
 Release date: 2022/11/09
 @itemlist[
   @item{Add license metadata to packages.}
   @item{Regular Github Actions testing setup.}
-  @item{Logging changes.}
-]
+  @item{Logging changes.}]
 
 @section{0.10.0}
 Release date: 2021/04/18
