@@ -20,8 +20,18 @@
 
 (provide make-keyring)
 
+(define error-message
+  (string-append
+        "The null keyring does not implement any keyring methods;\n"
+        " Please set the KEYRING environment variable or assign the default-keyring parameter"))
+
+(define ((null-keyring-unimplemented who) kr . vs)
+  (raise-unimplemented who error-message kr))
+
 (struct null-keyring ()
   #:property prop:keyring
-  (vector #f #f #f))
+  (vector (null-keyring-unimplemented 'get-password)
+          (null-keyring-unimplemented 'set-password!)
+          (null-keyring-unimplemented 'remove-password!)))
 
 (define make-keyring null-keyring)
