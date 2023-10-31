@@ -43,8 +43,9 @@
     (test-case "simple set and get password"
       (define kr (new secret-service-keyring% [secret-collection-path test-collection-path]))
       (with-service kr
-        (set-password! kr "test1" "test1-user" #"test1-secret")
-        (check-equal? (get-password kr "test1" "test1-user") #"test1-secret")))
+        (parameterize ([default-keyring kr])
+          (set-password! "test1" "test1-user" #"test1-secret")
+          (check-equal? (get-password "test1" "test1-user") #"test1-secret"))))
 
     ;; remove testing collection
     (parameterize ([current-dbus-connection (dbus-connect-session-bus)])
