@@ -27,7 +27,8 @@
  (struct-out keyring-backend-load-error))
 
 (require racket/format
-         racket/string)
+         racket/string
+         "logger.rkt")
 
 (struct keyring-error              exn:fail      [])
 (struct keyring-unimplemented      keyring-error [name])
@@ -58,20 +59,31 @@
 
 (define (raise-unimplemented who msg kr)
   (define message
-    (compose-error-message who msg "keyring" kr))
+    (compose-error-message who msg
+                           "keyring" kr
+                           "error-category" 'unimplemented))
+  (log-keyring-error message)
   (raise (keyring-unimplemented message (current-continuation-marks) who)))
 
 (define (raise-backend-error who
                              message
                              [backend #f]
                              [details null]
-                             [exc keyring-backend-error])
+                             [exc keyring-backend-error]
+                             [error-category 'backend])
   (define full-message
     (apply compose-error-message
-           who message "backend" backend
+           who message
+           "backend" backend
+           "error-category" error-category
            (flatten-assoc details)))
+  (log-keyring-error full-message)
   (raise
    (exc full-message (current-continuation-marks) backend)))
 
 (define (raise-backend-load-error who message [backend #f] [details null])
-  (raise-backend-error who message backend details keyring-backend-load-error))
+  (raise-backend-error who message
+                       backend
+                       details
+                       keyring-backend-load-error
+                       'backend-load-error))
