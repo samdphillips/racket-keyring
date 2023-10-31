@@ -108,7 +108,7 @@ stores which can be installed separately.
 @subsection{Struct Type Property Keyring Interface}
 @defthing[prop:keyring struct-type-property?]
 
-@subsection{Generic Keyring Interface}
+@subsection{Struct Generic Keyring Interface}
 @defidform[gen:keyring]
 
 @defproc[(get-password [keyring keyring?]
