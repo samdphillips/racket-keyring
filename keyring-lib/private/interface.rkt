@@ -99,14 +99,14 @@
 ;;
 ;; struct generics
 (define-generics keyring
-  [get-password     keyring service username]
-  [set-password!    keyring service username password]
-  [delete-password! keyring service username]
+  [get-password-proc     keyring service username]
+  [set-password-proc!    keyring service username password]
+  [delete-password-proc! keyring service username]
   #:derive-property
   prop:keyring
   (vector (λ (kr service username)
-            (get-password kr service username))
+            (get-password-proc kr service username))
           (λ (kr service username password)
-            (set-password! kr service username password))
+            (set-password-proc! kr service username password))
           (λ (kr service username)
-            (delete-password! kr service username))))
+            (delete-password-proc! kr service username))))
