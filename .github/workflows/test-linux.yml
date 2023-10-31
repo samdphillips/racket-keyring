@@ -12,6 +12,8 @@ jobs:
         racket-variant: ["BC", "CS"]
         racket-version: ["8.8", "8.9", "pre-release", "stable", "current"]
     runs-on: ubuntu-latest
+    env:
+      PLTSTDERR: fatal@keyring
     steps:
     - name: checkout
       uses: actions/checkout@master
