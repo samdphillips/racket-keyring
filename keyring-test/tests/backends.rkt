@@ -22,6 +22,9 @@
            keyring/private/error
            (submod keyring/private/backends for-test))
 
+  (define-syntax-rule (skip-on-pkgserver . body)
+    (unless (getenv "PLT_PKG_BUILD_SERVICE") . body))
+
   (test-case "parse-backend-connect-string"
     (define s "fake-backend:///all/passwords?token=cafebabe")
     (define-values (backend kws args) (parse-backend-connect-string s))
@@ -58,42 +61,46 @@
     (check-equal? kws null)
     (check-equal? args null))
 
-  (test-case "make-keyring-from-string missing backend"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (equal? (keyring-backend-load-error-name e) "nosuch")))
-     (lambda ()
-       (make-keyring-from-string "nosuch:"))))
+  (skip-on-pkgserver
+   (test-case "make-keyring-from-string missing backend"
+     (check-exn
+      (lambda (e)
+        (and (keyring-backend-load-error? e)
+             (equal? (keyring-backend-load-error-name e) "nosuch")))
+      (lambda ()
+        (make-keyring-from-string "nosuch:")))))
 
-  (test-case "make-keyring-from-string backend w/o constructor"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match?
-             #px"backend does not provide a make-keyring procedure"
-             (exn-message e))
-            (equal? (keyring-backend-load-error-name e) "test-no-constr")))
-     (lambda ()
-       (make-keyring-from-string "test-no-constr:"))))
+  (skip-on-pkgserver
+   (test-case "make-keyring-from-string backend w/o constructor"
+     (check-exn
+      (lambda (e)
+        (and (keyring-backend-load-error? e)
+             (regexp-match?
+              #px"backend does not provide a make-keyring procedure"
+              (exn-message e))
+             (equal? (keyring-backend-load-error-name e) "test-no-constr")))
+      (lambda ()
+        (make-keyring-from-string "test-no-constr:")))))
 
-  (test-case "make-keyring-from-string backend no backend specified"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match? #px"no backend specified" (exn-message e))
-            (equal? (keyring-backend-load-error-name e) #f)))
-     (lambda ()
-       (make-keyring-from-string "test"))))
+  (skip-on-pkgserver
+   (test-case "make-keyring-from-string backend no backend specified"
+     (check-exn
+      (lambda (e)
+        (and (keyring-backend-load-error? e)
+             (regexp-match? #px"no backend specified" (exn-message e))
+             (equal? (keyring-backend-load-error-name e) #f)))
+      (lambda ()
+        (make-keyring-from-string "test")))))
 
-  (test-case "make-keyring-from-string backend invalid scheme"
-    (check-exn
-     (lambda (e)
-       (and (keyring-backend-load-error? e)
-            (regexp-match? #px"invalid URL string" (exn-message e))
-            (equal? (keyring-backend-load-error-name e) #f)))
-     (lambda ()
-       (make-keyring-from-string "xxx;yyy://test"))))
+  (skip-on-pkgserver
+   (test-case "make-keyring-from-string backend invalid scheme"
+     (check-exn
+      (lambda (e)
+        (and (keyring-backend-load-error? e)
+             (regexp-match? #px"invalid URL string" (exn-message e))
+             (equal? (keyring-backend-load-error-name e) #f)))
+      (lambda ()
+        (make-keyring-from-string "xxx;yyy://test")))))
 
   (test-case "make-keyring-from-string test backend"
     (define keyring
