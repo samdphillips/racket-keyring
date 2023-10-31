@@ -105,7 +105,11 @@ stores which can be installed separately.
 
 @defmodule[keyring/interface]
 
-@subsection{Back End Keyring Methods}
+@subsection{Struct Type Property Keyring Interface}
+@defthing[prop:keyring struct-type-property?]
+
+@subsection{Struct Generic Keyring Interface}
+@defidform[gen:keyring]
 
 @defproc[(get-password [keyring keyring?]
                        [service-name string?]
@@ -123,12 +127,7 @@ stores which can be installed separately.
                            [username string?])
          void?]
 
-@subsection{Generic Keyring Interface}
-
-@defidform[gen:keyring]
-
-@defthing[prop:keyring struct-type-property?]
-
+@subsection{Class Keyring Interface}
 @definterface[keyring<%> ()]{
   @defmethod[(get-password
                [service-name string?]

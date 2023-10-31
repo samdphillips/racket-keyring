@@ -4,6 +4,16 @@
 
 @title{Changelog}
 
+@section{0.11.0}
+Release date: 2023/MM/DD
+@itemlist[
+  @item{Move tests into separate packages.}
+  @item{Reorganize the backends around @racket[prop:keyring]}
+  @item{Clean up error message formatting.}
+  @item{Add @var{null} backend as default when the @envvar{KEYRING}
+        environment variable is not set.}
+]
+
 @section{0.10.1}
 Release date: 2022/11/09
 @itemlist[
