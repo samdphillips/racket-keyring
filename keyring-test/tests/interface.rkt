@@ -82,11 +82,11 @@
 
   (struct g:keyring (store)
     #:methods gen:keyring
-    [(define (get-password kr service username)
+    [(define (get-password-proc kr service username)
        (hash-ref (g:keyring-store kr) (cons service username) #f))
-     (define (set-password! kr service username password)
+     (define (set-password-proc! kr service username password)
        (hash-set! (g:keyring-store kr) (cons service username) password))
-     (define (delete-password! kr service username)
+     (define (delete-password-proc! kr service username)
        (hash-remove! (g:keyring-store kr) (cons service username)))])
 
   (define (make-g:keyring) (g:keyring (make-hash)))

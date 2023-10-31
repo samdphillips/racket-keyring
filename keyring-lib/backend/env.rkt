@@ -52,10 +52,9 @@
 (struct env-keyring [base-key]
   #:methods
   gen:keyring
-  [(define get-password env-get-password)
-   (define set-password! env-set-password!)
-   (define delete-password! env-delete-password!)])
+  [(define get-password-proc env-get-password)
+   (define set-password-proc! env-set-password!)
+   (define delete-password-proc! env-delete-password!)])
 
 (define (make-keyring #:prefix base-env-key)
   (env-keyring base-env-key))
-
