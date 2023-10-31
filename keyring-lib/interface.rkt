@@ -29,8 +29,7 @@
  keyring?
  keyring-funcs
 
- raise-backend-error
- raise-backend-load-error
+ (all-from-out "private/error.rkt")
 
  keyring-logger
  log-keyring-fatal
@@ -38,4 +37,3 @@
  log-keyring-warning
  log-keyring-info
  log-keyring-debug)
-
