@@ -33,6 +33,11 @@
          ffi/unsafe/define
          ffi/unsafe/define/conventions)
 
+;; The package server will run this empty submodule instead of attempting to run
+;; the main module.  The main module will fail because it is only meant to run
+;; on Mac and the package server is Linux.
+(module test racket/base)
+
 (define core-lib
   (ffi-lib "/System/Library/Frameworks/CoreServices.framework/CoreServices"))
 
