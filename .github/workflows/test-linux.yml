@@ -26,5 +26,7 @@ jobs:
         version: ${{ matrix.racket-version }}
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring-test ./keyring
+    - name: check dependencies
+      run: raco setup --check-pkg-deps --unused-pkg-deps --pkgs keyring-lib keyring-test keyring
     - name: run base tests
       run: raco test --drdr --package keyring-test
