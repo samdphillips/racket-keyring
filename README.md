@@ -21,7 +21,7 @@ keychain follow these instructions.
    ```
 
 # Changelog
-## 0.11.0
+## 0.11
 
 Release date: 2023/10/31
 

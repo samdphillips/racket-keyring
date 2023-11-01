@@ -4,7 +4,7 @@
 
 @title{Changelog}
 
-@section{0.11.0}
+@section{0.11}
 Release date: 2023/10/31
 @itemlist[
   @item{Move tests into separate packages.}
