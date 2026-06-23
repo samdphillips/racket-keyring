@@ -1,0 +1,110 @@
+#lang rhombus/static/and_meta
+
+import:
+  lib("racket/base.rkt") as rkt
+  lib("keyring/interface.rkt") as _kri:
+    rename:
+      #{keyring-funcs} as keyring_funcs
+  lib("keyring/main.rkt")!for_rhombus as kr
+
+export:
+  Keyring
+
+annot.macro 'KR': 'satisfying(_kri.#{keyring?})'
+
+namespace kri:
+  decl.nestable_macro 'bounce($(name :: Identifier), $(pos :: Nat))':
+    '«export expr.macro '$name ($('$')keyring, $('$')args, $('...'))':
+        'block:
+           let keyring :: KR = $('$')keyring
+           def kr_fun = Array.get(_kri.keyring_funcs(keyring), $pos)
+           kr_fun($('$')keyring, $('$')args, $('...'))'»'
+
+  bounce(get_password, 0)
+  bounce(set_password, 1)
+  bounce(delete_password, 2)
+
+interface Keyring:
+  protected method do_get_password(service :: String,
+                                   username :: String) :: maybe(Bytes)
+  protected method do_set_password(service :: String,
+                                   username :: String,
+                                   password :: Bytes)
+  protected method do_delete_password(service :: String,
+                                      username :: String)
+
+  property handle: this
+
+  primitive_property _kri.#{prop:keyring}:
+    Array(fun(kr, svc, uname):
+            Keyring.do_get_password(kr, svc, uname),
+          fun(kr, svc, uname, pass):
+            Keyring.do_set_password(kr, svc, uname, pass),
+          fun(kr, svc, uname):
+            Keyring.do_delete_password(kr, svc, uname))
+
+  final method get_password(service :: String,
+                            username :: String) :: maybe(Bytes):
+    kri.get_password(handle, service, username)
+
+  final method set_password(service :: String,
+                            username :: String,
+                            password :: Bytes):
+    kri.set_password(handle, service, username, password)
+
+  final method delete_password(service :: String, username :: String):
+    kri.delete_password(handle, service, username)
+
+  export default
+
+// derived parameter trick from the Rhombus implementation
+// (see: rhombus/private/parameter.rhm)
+annot.macro 'DefaultKeyring':
+  let '$(a :: annot_meta.Parsed)':
+    'Function.all_of(() -> Keyring, (Keyring) -> Void)'
+  let (_, _, statinfo) = annot_meta.unpack_converter(a)
+  annot_meta.pack_predicate('fun (_): #true', statinfo)
+
+def default :~ DefaultKeyring:
+  fun
+  | to_racket(v :: RacketKeyring): v.handle
+  | to_racket(v :: Keyring || KR): v
+  fun
+  | from_racket(v :: Keyring): v
+  | from_racket(v :: KR): RacketKeyring(v)
+  rkt.#{make-derived-parameter}(kr.#{default-keyring},
+                                to_racket,
+                                from_racket,
+                                #'#{Keyring.default},
+                                #'rhombus)
+
+class RacketKeyring(_handle :: KR):
+  implements Keyring
+
+  override property handle: _handle
+
+  override method do_get_password(service, username):
+    kri.get_password(handle, service, username)
+
+  override method do_set_password(service, username, password):
+    kri.set_password(handle, service, username, password)
+
+  override method do_delete_password(service, username):
+    kri.delete_password(handle, service, username)
+
+module test:
+  class K(mutable service,
+          mutable username,
+          mutable password):
+    implements Keyring
+
+    override method do_get_password(svc, uname):
+      cond
+      | svc == service && uname == username: password
+      | ~else: #false
+
+    override method do_set_password():
+      #void
+
+    override method do_delete_password():
+      #void
