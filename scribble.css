@@ -12,7 +12,7 @@
    see if any font is set. */
 
 /* Monospace: */
-.maincolumn, .refpara, .refelem, .tocset, .stt, .hspace, .refparaleft, .refelemleft {
+.maincolumn, .refpara, .refelem, .tocset, .stt, .hspace, .refparaleft, .refelemleft, .reffootnote {
   font-family: monospace;
 }
 
@@ -22,7 +22,7 @@
 }
 
 /* Sans-serif: */
-.version, .versionNoNav, .ssansserif {
+.version, .versionNoNav, .ssansserif, .navfamily {
   font-family: sans-serif;
 }
 .ssansserif {
@@ -57,13 +57,26 @@ p, .SIntrapara {
   margin: 1em 0;
 }
 
-h2 { /* per-page main title */
+h1 { /* per-page main title */
+  font-size: 1.5em;
   margin-top: 0;
 }
 
-h3, h4, h5, h6, h7, h8 {
+h2, h3, h4, h5, h6, h7, h8 {
   margin-top: 1.75em;
   margin-bottom: 0.5em;
+}
+
+h2 {
+  font-size: 1.17em;
+}
+
+h3 {
+  font-size: 1.00em;
+}
+
+h4 {
+  font-size: 0.83em;
 }
 
 .SSubSubSubSection {
@@ -198,9 +211,26 @@ table td {
 }
 
 /* ---------------------------------------- */
+/* Language Family */
+
+.navfamily {
+  float: right;
+  white-space: nowrap;
+  left: 2em;
+  height: 0em;
+  width: 10.5em;
+  margin: 1.5em -13em 0em 0em;
+  font-size: small;
+}
+
+.docfamily:after {
+  content: " language family";
+}
+
+/* ---------------------------------------- */
 /* Margin notes */
 
-.refpara, .refelem {
+.refpara, .refelem, .reffootnote {
   position: relative;
   float: right;
   left: 2em;
@@ -209,7 +239,7 @@ table td {
   margin: 0em -13em 0em 0em;
 }
 
-.refpara, .refparaleft {
+.refpara, .refparaleft, .reffootnote {
   top: -1em;
 }
 
@@ -252,6 +282,15 @@ table td {
   margin: 0 0 0 0;
 }
 
+/* narrow display => inline right-hand margin notes */
+@media screen and (max-width: 55em) {
+    .refpara, .refelem, .reffootnote {
+        all: unset !important;
+        display: block !important;
+        margin: 1em 0 !important;
+        padding: 0.75em !important;
+    }
+}
 
 /* ---------------------------------------- */
 /* Table of contents, inline */
@@ -487,7 +526,7 @@ ol ol ol ol { list-style-type: upper-alpha; }
   position: relative;
   float: right;
   left: 2em;
-  top: -2.5em;
+  top: -2.25em;
   height: 0em;
   width: 13em;
   margin: 0em -13em 0em 0em;
@@ -513,4 +552,36 @@ ol ol ol ol { list-style-type: upper-alpha; }
     margin-right: 13em;
     margin-left: 0;
   }
+}
+
+/** Begin headings */
+
+/* Hide the button group by default, but show them on hovering the heading title */
+.button-group {
+    padding-left: 0.3em;
+    visibility: hidden;
+    position: absolute;
+}
+.heading:hover > .button-group {
+    visibility: visible;
+}
+
+.button-group > a {
+    margin: 0 0.25em;
+}
+
+.button-group > a, .button-group > a:hover {
+    text-decoration: none;
+}
+
+.heading-anchor {
+    font-size: 60%;
+    /* A trick to color an emoji from https://stackoverflow.com/questions/32413731/color-for-unicode-emoji */
+    color: transparent;
+    text-shadow: 0 0 0 gray;
+    vertical-align: 5%;
+}
+
+.heading-source {
+    visibility: hidden;
 }
