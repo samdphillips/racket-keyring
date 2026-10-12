@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         racket-variant: ["BC", "CS"]
-        racket-version: ["8.8", "8.9", "pre-release", "stable", "current"]
+        racket-version: ["8.18", "9.1", "9.2", "pre-release", "stable", "current"]
     runs-on: macos-latest
     env:
       PLTSTDERR: fatal@keyring
@@ -18,7 +18,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@master
     - name: install racket
-      uses: Bogdanp/setup-racket@v1.8.1
+      uses: Bogdanp/setup-racket@v1.15
       with:
         architecture: 'x64'
         distribution: 'full'
