@@ -21,6 +21,13 @@ keychain follow these instructions.
    ```
 
 # Changelog
+
+## 2026.10.0
+
+Release date: 2026/10/12
+
+* Repaired test package dependencies.
+
 ## 0.11
 
 Release date: 2023/10/31

@@ -4,6 +4,11 @@
 
 @title{Changelog}
 
+@section{2026.10.0}
+Release date: 2026/10/12
+@itemlist[
+  @item{Repaired test package dependencies.}]
+
 @section{0.11}
 Release date: 2023/10/31
 @itemlist[
