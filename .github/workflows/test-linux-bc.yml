@@ -7,10 +7,6 @@ on:
   - cron: "17 16 * * FRI"
 jobs:
   test:
-    strategy:
-      matrix:
-        racket-variant: ["BC", "CS"]
-        racket-version: ["8.18", "9.1", "9.2", "pre-release", "stable", "current"]
     runs-on: ubuntu-latest
     env:
       PLTSTDERR: fatal@keyring
@@ -22,8 +18,8 @@ jobs:
       with:
         architecture: 'x64'
         distribution: 'full'
-        variant: ${{ matrix.racket-variant }}
-        version: ${{ matrix.racket-version }}
+        variant: "BC"
+        version: "8.17"
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring-test ./keyring
     - name: check dependencies

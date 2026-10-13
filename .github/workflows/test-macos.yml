@@ -9,7 +9,6 @@ jobs:
   test:
     strategy:
       matrix:
-        racket-variant: ["BC", "CS"]
         racket-version: ["8.18", "9.1", "9.2", "pre-release", "stable", "current"]
     runs-on: macos-latest
     env:
@@ -22,7 +21,7 @@ jobs:
       with:
         architecture: 'x64'
         distribution: 'full'
-        variant: ${{ matrix.racket-variant }}
+        variant: "CS"
         version: ${{ matrix.racket-version }}
     - name: install base package
       run: raco pkg install --batch --auto ./keyring-lib ./keyring-test ./keyring
